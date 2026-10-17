@@ -9,7 +9,7 @@ one common space, MNI152NLin2009cAsym (millimetres, RAS), so the layers can be s
 
 | Layer | What it is | Ways to look at it |
 |---|---|---|
-| Cortex | FreeSurfer *fsaverage*, 163,842 vertices per hemisphere | Morph between the pial, white, inflated, very inflated and sphere surfaces. Colour by sulcal depth, curvature or pial–white distance, or by 12 parcellations: Desikan–Killiany, Destrieux, Glasser HCP-MMP1, Brainnetome, Yeo 7/17, Schaefer 100/400/1000, Lausanne 1/3/5. Solid or glass styles. |
+| Cortex | FreeSurfer *fsaverage*, 163,842 vertices per hemisphere | Morph between the pial, white, inflated, very inflated and sphere surfaces. Colour by sulcal depth, curvature or pial–white distance, or by 12 parcellations: Desikan–Killiany, Destrieux, Glasser HCP-MMP1, Brainnetome, Yeo 7/17, Schaefer 100/400/1000, Lausanne 1/3/5. A body map shows which body part each stretch of the motor and touch strips serves (from Brainnetome), with labels on the surface. Solid or glass styles. |
 | Subcortical structures | Surfaces from the template's aseg segmentation | Thalamus, basal ganglia, hippocampus, amygdala, brainstem, cerebellum, ventricles, corpus callosum, and the cortex and white matter as volumetric segmentations. |
 | Subcortical nuclei | MASSP atlas | 63 small nuclei (STN, SN, red nucleus, GPi/GPe, VTA, PAG…), hippocampal subfields, commissures. |
 | Thalamic nuclei | MIAL atlas | 7 nuclear groups per thalamus. |
@@ -17,6 +17,7 @@ one common space, MNI152NLin2009cAsym (millimetres, RAS), so the layers can be s
 | MRI slices | T1, T2 and GM/WM/CSF probability maps | Axial, coronal and sagittal planes, with an optional label overlay (aseg, MASSP, thalamic, tissue class). |
 | Volume rendering | The same volumes, ray-marched on the GPU | Iso-surface, translucent, or maximum-intensity projection, optionally coloured by labels. |
 | Context | Brain hull from the template's brain mask; head (skin) from the full-head T1 | Glass or solid. |
+| TMS targets | Published TMS treatment targets: depression (left DLPFC by the 5-cm rule, F3 and connectivity; right DLPFC), OCD, smoking cessation, migraine, and the motor hotspot that sets the dose | A dot on the brain target, a ring where the coil sits on the scalp, labels, and the use, method and source on hover. Group averages, for learning only. |
 
 The cut-away plane clips every 3D layer. Hovering anything names it: the region in the current
 atlas, the structure, the tract, or the label under a slice. The MNI coordinate is shown too.

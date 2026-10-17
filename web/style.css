@@ -131,6 +131,9 @@ input[type=checkbox] { accent-color: var(--accent); margin: 0; }
 
 .legend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); margin: -2px 0 8px; }
 .legend i { flex: 1; height: 8px; border-radius: 4px; }
+.keys { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 11px; color: var(--dim); margin: -2px 0 8px; }
+.keys i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.check.disabled { opacity: 0.4; cursor: default; }
 
 .btns { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 8px; }
 
@@ -162,6 +165,21 @@ input[type=checkbox] { accent-color: var(--accent); margin: 0; }
   color: var(--dim);
   font-size: 15px;
   pointer-events: none;
+}
+
+#labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.label3d {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 1px 7px;
+  border-left: 3px solid #fff;
+  border-radius: 4px;
+  background: rgba(12, 15, 20, 0.8);
+  color: #f2f5f9;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 #tip {

@@ -99,7 +99,11 @@ export function checkbox(parent, label, checked, onChange, { swatch } = {}) {
   }
   row.append(el('span', '', label));
   parent.append(row);
-  return { row, input: c, set: (v) => { c.checked = v; } };
+  return {
+    row, input: c,
+    set: (v) => { c.checked = v; },
+    setEnabled: (on) => { c.disabled = !on; row.classList.toggle('disabled', !on); },
+  };
 }
 
 export function inline(parent, cls = 'inline') {

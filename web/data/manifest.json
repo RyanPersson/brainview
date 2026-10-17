@@ -7897,6 +7897,151 @@
       ]
      }
     }
+   },
+   {
+    "id": "bodymap",
+    "label": "Body map (motor & touch strips)",
+    "description": "Which body part each stretch of the motor strip (primary motor cortex, darker) and the touch strip (primary somatosensory cortex, lighter) serves, from the body-part subregions of the Brainnetome atlas (Fan et al. 2016). This is the order of Penfield's homunculus, though the borders are not sharp. Gordon et al. (2023) also found zones between the body parts that plan whole-body actions.",
+    "hemis": {
+     "L": {
+      "labels": {
+       "url": "data/cortex/L_atlas_bodymap.bin.gz",
+       "dtype": "uint16",
+       "length": 163842
+      },
+      "names": [
+       "Rest of the cortex",
+       "Leg & foot (movement \u00b7 primary motor cortex)",
+       "Trunk (movement \u00b7 primary motor cortex)",
+       "Arm & hand (movement \u00b7 primary motor cortex)",
+       "Head & face (movement \u00b7 primary motor cortex)",
+       "Tongue & throat (movement \u00b7 primary motor cortex)",
+       "Leg & foot (touch \u00b7 primary somatosensory cortex)",
+       "Trunk (touch \u00b7 primary somatosensory cortex)",
+       "Arm, hand & face (touch \u00b7 primary somatosensory cortex)",
+       "Tongue & throat (touch \u00b7 primary somatosensory cortex)"
+      ],
+      "colors": [
+       "#8c8c8c",
+       "#3d7bd9",
+       "#2bb3a0",
+       "#e3b22b",
+       "#e0503c",
+       "#b05cd6",
+       "#9ebdec",
+       "#95d9d0",
+       "#f4c499",
+       "#d8aeea"
+      ],
+      "anchors": [
+       {
+        "text": "Leg & foot",
+        "color": "#3d7bd9",
+        "vertex": 140232
+       },
+       {
+        "text": "Trunk",
+        "color": "#2bb3a0",
+        "vertex": 17857
+       },
+       {
+        "text": "Arm & hand",
+        "color": "#e3b22b",
+        "vertex": 118667
+       },
+       {
+        "text": "Head & face",
+        "color": "#e0503c",
+        "vertex": 41012
+       },
+       {
+        "text": "Tongue & throat",
+        "color": "#b05cd6",
+        "vertex": 128885
+       }
+      ]
+     },
+     "R": {
+      "labels": {
+       "url": "data/cortex/R_atlas_bodymap.bin.gz",
+       "dtype": "uint16",
+       "length": 163842
+      },
+      "names": [
+       "Rest of the cortex",
+       "Leg & foot (movement \u00b7 primary motor cortex)",
+       "Trunk (movement \u00b7 primary motor cortex)",
+       "Arm & hand (movement \u00b7 primary motor cortex)",
+       "Head & face (movement \u00b7 primary motor cortex)",
+       "Tongue & throat (movement \u00b7 primary motor cortex)",
+       "Leg & foot (touch \u00b7 primary somatosensory cortex)",
+       "Trunk (touch \u00b7 primary somatosensory cortex)",
+       "Arm, hand & face (touch \u00b7 primary somatosensory cortex)",
+       "Tongue & throat (touch \u00b7 primary somatosensory cortex)"
+      ],
+      "colors": [
+       "#8c8c8c",
+       "#3d7bd9",
+       "#2bb3a0",
+       "#e3b22b",
+       "#e0503c",
+       "#b05cd6",
+       "#9ebdec",
+       "#95d9d0",
+       "#f4c499",
+       "#d8aeea"
+      ],
+      "anchors": [
+       {
+        "text": "Leg & foot",
+        "color": "#3d7bd9",
+        "vertex": 150262
+       },
+       {
+        "text": "Trunk",
+        "color": "#2bb3a0",
+        "vertex": 54415
+       },
+       {
+        "text": "Arm & hand",
+        "color": "#e3b22b",
+        "vertex": 25700
+       },
+       {
+        "text": "Head & face",
+        "color": "#e0503c",
+        "vertex": 60281
+       },
+       {
+        "text": "Tongue & throat",
+        "color": "#b05cd6",
+        "vertex": 117213
+       }
+      ]
+     }
+    },
+    "legend": [
+     {
+      "name": "Leg & foot",
+      "color": "#3d7bd9"
+     },
+     {
+      "name": "Trunk",
+      "color": "#2bb3a0"
+     },
+     {
+      "name": "Arm & hand",
+      "color": "#e3b22b"
+     },
+     {
+      "name": "Head & face",
+      "color": "#e0503c"
+     },
+     {
+      "name": "Tongue & throat",
+      "color": "#b05cd6"
+     }
+    ]
    }
   ],
   "shading": "sulc"
@@ -10777,6 +10922,303 @@
      "#3b7dd8",
      "#d0574f",
      "#ece8dc"
+    ]
+   }
+  ]
+ },
+ "tms": {
+  "description": "Where common TMS treatments aim, from published studies. Positions are group averages on the template brain. Clinics find each patient's own target.",
+  "groups": [
+   "Setting the dose",
+   "Depression",
+   "OCD",
+   "Smoking cessation",
+   "Migraine"
+  ],
+  "targets": [
+   {
+    "id": "m1_hand",
+    "name": "Motor hotspot (hand)",
+    "group": "Setting the dose",
+    "use": "Single pulses here make the thumb or index finger twitch. The weakest pulse that does it (the motor threshold) sets the strength of every treatment session.",
+    "how": "Found by moving the coil over the scalp while watching the hand.",
+    "coil": "Figure-8 coil",
+    "source": "Peak of primary motor cortex in a meta-analysis of motor imaging studies (Mayka et al. 2006), Talairach \u221237, \u221221, 58 converted to MNI",
+    "color": "#e9edf2",
+    "broad": false,
+    "mni": [
+     -37.37,
+     -24.61,
+     61.82
+    ],
+    "points": [
+     {
+      "cortex": [
+       -38.43,
+       -25.72,
+       62.25
+      ],
+      "scalp": [
+       -56.17,
+       -21.4,
+       83.96
+      ],
+      "normal": [
+       -0.62,
+       0.16,
+       0.77
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dlpfc_5cm",
+    "name": "Left DLPFC: 5-cm rule",
+    "group": "Depression",
+    "use": "The target of the trials behind the first FDA clearance of TMS for depression (2008).",
+    "how": "5 cm forward along the scalp from the motor hotspot. In many heads this lands farther back than intended, on premotor cortex.",
+    "coil": "Figure-8 coil",
+    "source": "Average of published 5-cm sites (Fox et al. 2012)",
+    "color": "#ffb340",
+    "broad": false,
+    "mni": [
+     -41.0,
+     16.0,
+     54.0
+    ],
+    "points": [
+     {
+      "cortex": [
+       -40.59,
+       16.12,
+       54.13
+      ],
+      "scalp": [
+       -53.53,
+       23.78,
+       67.33
+      ],
+      "normal": [
+       -0.68,
+       0.35,
+       0.65
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dlpfc_f3",
+    "name": "Left DLPFC: F3",
+    "group": "Depression",
+    "use": "A common depression target where MRI guidance isn't used.",
+    "how": "F3 is a position of the EEG 10\u201320 system, found with tape-measure head measurements (the Beam F3 method, Beam et al. 2009).",
+    "coil": "Figure-8 coil",
+    "source": "Cortex under F3 (Herwig et al. 2003, as tabulated by Fox et al. 2012)",
+    "color": "#ffb340",
+    "broad": false,
+    "mni": [
+     -37.0,
+     26.0,
+     49.0
+    ],
+    "points": [
+     {
+      "cortex": [
+       -37.63,
+       26.2,
+       48.9
+      ],
+      "scalp": [
+       -51.61,
+       35.83,
+       61.32
+      ],
+      "normal": [
+       -0.67,
+       0.46,
+       0.59
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dlpfc_conn",
+    "name": "Left DLPFC: connectivity target",
+    "group": "Depression",
+    "use": "Published left-DLPFC sites worked better the more their activity runs opposite to the subgenual cingulate's. This is the group-average best site.",
+    "how": "Reached with MRI neuronavigation. The accelerated SAINT/SNT protocol finds each patient's own version from their fMRI (Cole et al. 2020, 2022).",
+    "coil": "Figure-8 coil",
+    "source": "Fox et al. 2012",
+    "color": "#ffb340",
+    "broad": false,
+    "mni": [
+     -38.0,
+     44.0,
+     26.0
+    ],
+    "points": [
+     {
+      "cortex": [
+       -37.25,
+       45.18,
+       26.53
+      ],
+      "scalp": [
+       -53.11,
+       58.02,
+       34.23
+      ],
+      "normal": [
+       -0.71,
+       0.61,
+       0.35
+      ]
+     }
+    ]
+   },
+   {
+    "id": "dlpfc_right",
+    "name": "Right DLPFC: F4",
+    "group": "Depression",
+    "use": "Slow (1 Hz), calming stimulation here is an alternative or an addition to left-sided treatment.",
+    "how": "F4 is the right-hand twin of F3 in the 10\u201320 system. Shown here as the mirror image of the F3 site.",
+    "coil": "Figure-8 coil",
+    "source": "Mirror of the F3 site (Herwig et al. 2003)",
+    "color": "#ffb340",
+    "broad": false,
+    "mni": [
+     37.0,
+     26.0,
+     49.0
+    ],
+    "points": [
+     {
+      "cortex": [
+       37.52,
+       26.06,
+       50.44
+      ],
+      "scalp": [
+       50.43,
+       37.11,
+       62.99
+      ],
+      "normal": [
+       0.62,
+       0.52,
+       0.59
+      ]
+     }
+    ]
+   },
+   {
+    "id": "ocd",
+    "name": "Medial prefrontal & anterior cingulate",
+    "group": "OCD",
+    "use": "Deep TMS with the H7 coil, FDA-cleared as an add-on treatment for OCD (2018).",
+    "how": "The coil sits on the midline, 4 cm in front of the spot that makes the leg twitch.",
+    "coil": "H7 deep-TMS coil",
+    "source": "Carmi et al. 2018, 2019",
+    "color": "#5cc8ff",
+    "broad": true,
+    "mni": null,
+    "points": [
+     {
+      "cortex": [
+       0.0,
+       20.83,
+       28.49
+      ],
+      "scalp": [
+       -0.78,
+       24.63,
+       92.87
+      ],
+      "normal": [
+       -0.01,
+       0.43,
+       0.9
+      ]
+     }
+    ]
+   },
+   {
+    "id": "smoking",
+    "name": "Insula & lateral prefrontal cortex",
+    "group": "Smoking cessation",
+    "use": "Deep TMS with the H4 coil, FDA-cleared in 2020 as a short-term aid to quitting smoking. It reaches the lateral prefrontal cortex and the insula on both sides.",
+    "how": "The coil is a helmet; its position is set from the motor hotspot.",
+    "coil": "H4 deep-TMS coil",
+    "source": "Zangen et al. 2021",
+    "color": "#7ddc6f",
+    "broad": true,
+    "mni": null,
+    "points": [
+     {
+      "cortex": [
+       -36.67,
+       -2.79,
+       3.51
+      ],
+      "scalp": [
+       -82.59,
+       6.1,
+       1.32
+      ],
+      "normal": [
+       -0.98,
+       0.18,
+       -0.0
+      ]
+     },
+     {
+      "cortex": [
+       37.95,
+       -1.32,
+       2.84
+      ],
+      "scalp": [
+       82.69,
+       7.98,
+       2.5
+      ],
+      "normal": [
+       0.98,
+       0.21,
+       0.0
+      ]
+     }
+    ]
+   },
+   {
+    "id": "migraine",
+    "name": "Occipital cortex",
+    "group": "Migraine",
+    "use": "A handheld single-pulse device, FDA-cleared for migraine with aura (2013). The pulse is thought to interrupt the wave of cortical activity behind the aura.",
+    "how": "Held against the back of the head by the patient at the start of an attack.",
+    "coil": "Handheld single-pulse device",
+    "source": "Lipton et al. 2010",
+    "color": "#d39cff",
+    "broad": true,
+    "mni": null,
+    "points": [
+     {
+      "cortex": [
+       0.0,
+       -95.48,
+       -1.29
+      ],
+      "scalp": [
+       -0.69,
+       -123.57,
+       0.99
+      ],
+      "normal": [
+       -0.04,
+       -0.99,
+       0.12
+      ]
+     }
     ]
    }
   ]

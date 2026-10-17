@@ -25,6 +25,7 @@ export class Cortex {
     this.overlay = 'atlas:dk';
     this.foldShading = true;
     this.outlines = false;
+    this.showLabels = true;
     this.style = 'solid';
     this.opacity = 1;
     this.hemiOn = { L: true, R: true };
@@ -223,6 +224,26 @@ export class Cortex {
       col[i * 3] = lin(r); col[i * 3 + 1] = lin(g); col[i * 3 + 2] = lin(b);
     }
     H.geo.attributes.color.needsUpdate = true;
+  }
+
+  // Labels of the current overlay (only atlases with anchors have them), at the anchor vertex of whatever
+  // shape is showing, lifted slightly off the surface. They are hidden by cortex in front of them.
+  labelItems() {
+    const meta = this.current?.meta;
+    if (!this.group.visible || !this.showLabels || !meta?.hemis?.L?.anchors) return [];
+    const out = [];
+    for (const [h, H] of Object.entries(this.hemis)) {
+      if (!H.mesh.visible) continue;
+      const pos = H.geo.attributes.position.array, nor = H.geo.attributes.normal.array;
+      for (const a of meta.hemis[h].anchors) {
+        const i = a.vertex * 3;
+        out.push({
+          text: a.text, color: a.color, occlude: true,
+          pos: [pos[i] + nor[i] * 1.5, pos[i + 1] + nor[i + 1] * 1.5, pos[i + 2] + nor[i + 2] * 1.5],
+        });
+      }
+    }
+    return out;
   }
 
   // Bounds trees are built lazily and refitted after a shape change.

@@ -1,9 +1,13 @@
 // Headless check: load the viewer once, then for each "name::js" argument run the snippet against
 // window.brainview (as B) and save out/<name>.png.   usage: node tools/shot.mjs "a::B.setView('Left')" ...
+import { readdirSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
 const W = +(process.env.W || 1440), H = +(process.env.H || 900);
+// the newest chrome-headless-shell that puppeteer has installed on this machine
+const shells = `${process.env.HOME}/.cache/puppeteer/chrome-headless-shell`;
+const build = readdirSync(shells).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).at(-1);
 const browser = await puppeteer.launch({
-  executablePath: `${process.env.HOME}/.cache/puppeteer/chrome-headless-shell/linux-145.0.7632.77/chrome-headless-shell-linux64/chrome-headless-shell`,
+  executablePath: `${shells}/${build}/chrome-headless-shell-linux64/chrome-headless-shell`,
   headless: 'shell',
   args: ['--no-sandbox', '--use-angle=gl-egl', '--ignore-gpu-blocklist', `--window-size=${W},${H}`],
 });

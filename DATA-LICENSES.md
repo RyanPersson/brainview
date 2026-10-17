@@ -38,7 +38,7 @@ them under the same
 | Yeo 7/17 networks (FreeSurfer 7) | Cortex colours | [FreeSurfer license](web/licenses/FreeSurfer.txt) | Yeo et al. 2011, [doi:10.1152/jn.00338.2011](https://doi.org/10.1152/jn.00338.2011) |
 | Schaefer 2018, 100/400/1000 parcels | Cortex colours | MIT ([CBIG](https://github.com/ThomasYeoLab/CBIG)) | Schaefer et al. 2018, [doi:10.1093/cercor/bhx179](https://doi.org/10.1093/cercor/bhx179) |
 | Lausanne 2018, scales 1/3/5 (Alemán-Gómez, Cammoun, Hagmann) | Cortex colours | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Cammoun et al. 2012, [doi:10.1016/j.jneumeth.2011.09.031](https://doi.org/10.1016/j.jneumeth.2011.09.031) |
-| Brainnetome cortical parcellation | Cortex colours | [Non-commercial, share-alike](web/licenses/Brainnetome.txt) + HCP terms | Fan et al. 2016, [doi:10.1093/cercor/bhw157](https://doi.org/10.1093/cercor/bhw157) |
+| Brainnetome cortical parcellation | Cortex colours, and the body map (its motor and touch subregions grouped by body part) | [Non-commercial, share-alike](web/licenses/Brainnetome.txt) + HCP terms | Fan et al. 2016, [doi:10.1093/cercor/bhw157](https://doi.org/10.1093/cercor/bhw157) |
 | HCP-MMP1.0 projected on fsaverage, by Kathryn Mills | Cortex colours (Glasser) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) + HCP terms | Glasser et al. 2016, [doi:10.1038/nature18933](https://doi.org/10.1038/nature18933); Mills 2016, [doi:10.6084/m9.figshare.3498446.v2](https://doi.org/10.6084/m9.figshare.3498446.v2) |
 | ICBM 2009c nonlinear asymmetric template: T1, T2, GM/WM/CSF probabilities, brain mask | MRI slices, volume rendering, brain hull, head (skin surface of the T1) | [MNI notice](web/licenses/MNI-ICBM152.txt) | Fonov et al. 2011, [doi:10.1016/j.neuroimage.2010.07.033](https://doi.org/10.1016/j.neuroimage.2010.07.033); Fonov et al. 2009, [doi:10.1016/S1053-8119(09)70884-5](https://doi.org/10.1016/S1053-8119(09)70884-5) |
 | aseg segmentation of that template (made with FreeSurfer, distributed by TemplateFlow) | Subcortical structures, label overlay | [MNI notice](web/licenses/MNI-ICBM152.txt); label names and colours from FreeSurferColorLUT ([FreeSurfer license](web/licenses/FreeSurfer.txt)) | as for the template |
@@ -56,6 +56,32 @@ Where the files came from:
 
 The FreeSurfer license notes that this data was made for research and is not meant for clinical
 use. Brainview is the same: it's for learning and exploring, not for diagnosis.
+
+## TMS targets
+
+The TMS layer places published coordinates and procedures on the template. They are facts from these
+papers, not data files:
+
+- The 5-cm rule and connectivity targets, and the cortex under F3: Fox et al. 2012,
+  [doi:10.1016/j.biopsych.2012.04.028](https://doi.org/10.1016/j.biopsych.2012.04.028), which
+  tabulates Herwig et al. 2003, [doi:10.1023/B:BRAT.0000006333.93597.9d](https://doi.org/10.1023/B:BRAT.0000006333.93597.9d).
+- The Beam F3 method: Beam et al. 2009, [doi:10.1016/j.brs.2008.09.006](https://doi.org/10.1016/j.brs.2008.09.006).
+- SAINT/SNT: Cole et al. 2020, [doi:10.1176/appi.ajp.2019.19070720](https://doi.org/10.1176/appi.ajp.2019.19070720),
+  and 2022, [doi:10.1176/appi.ajp.2021.20101429](https://doi.org/10.1176/appi.ajp.2021.20101429).
+- The motor hotspot: the M1 peak of Mayka et al. 2006, [doi:10.1016/j.neuroimage.2006.02.004](https://doi.org/10.1016/j.neuroimage.2006.02.004).
+- OCD (H7 coil): Carmi et al. 2018, [doi:10.1016/j.brs.2017.09.004](https://doi.org/10.1016/j.brs.2017.09.004),
+  and 2019, [doi:10.1176/appi.ajp.2019.18101180](https://doi.org/10.1176/appi.ajp.2019.18101180).
+- Smoking cessation (H4 coil): Zangen et al. 2021, [doi:10.1002/wps.20905](https://doi.org/10.1002/wps.20905).
+- Migraine (single-pulse TMS): Lipton et al. 2010, [doi:10.1016/S1474-4422(10)70054-5](https://doi.org/10.1016/S1474-4422(10)70054-5).
+
+Some positions are approximations made here, not published coordinates:
+- The right-DLPFC point is the mirror image of the F3 site.
+- The OCD, smoking and migraine points are centres of atlas regions (Desikan–Killiany anterior
+  cingulate and insula, Destrieux occipital pole).
+- The OCD coil spot is placed 4 cm in front of the scalp above Brainnetome's leg motor area.
+
+The body map's note on effector and inter-effector zones refers to Gordon et al. 2023,
+[doi:10.1038/s41586-023-05964-2](https://doi.org/10.1038/s41586-023-05964-2).
 
 ## Libraries
 

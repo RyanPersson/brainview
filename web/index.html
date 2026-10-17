@@ -18,6 +18,7 @@
 </head>
 <body>
   <canvas id="view"></canvas>
+  <div id="labels"></div>
 
   <aside id="panel">
     <header>
@@ -39,6 +40,8 @@
       <li><b>Cortical surfaces</b>: FreeSurfer <i>fsaverage</i>, 163,842 vertices per hemisphere (pial, white, sphere, sulc, curv). Retrieved via <a href="https://www.templateflow.org" target="_blank" rel="noopener">TemplateFlow</a>. The inflated surfaces are computed here by area-preserving Laplacian smoothing of the white surface.</li>
       <li><b>Cortical atlases</b>: Desikan–Killiany (Desikan 2006); Destrieux (2010); Yeo 7/17 networks (2011); Schaefer 100/400/1000 (2018); Brainnetome (Fan 2016); Lausanne 2018 (Cammoun 2012). All from TemplateFlow. Glasser HCP-MMP1 (Glasser 2016), as projected onto fsaverage by Kathryn Mills (figshare, CC BY 4.0).</li>
       <li><b>Volumes</b>: ICBM 2009c nonlinear asymmetric template (Fonov 2009/2011): T1, T2, tissue probabilities, and an aseg-style segmentation. Also the MASSP 2.0 subcortical atlas (Bazin 2025) and the MIAL thalamic nuclei (Najdenovska 2018). All from TemplateFlow.</li>
+      <li><b>Body map</b>: the motor (area 4) and touch (areas 1/2/3) subregions of the Brainnetome atlas, grouped by body part. The zones between body parts are described by Gordon et al. 2023.</li>
+      <li><b>TMS targets</b>: published targets placed on the template. Depression: Fox et al. 2012 (the 5-cm rule, F3 after Herwig 2003, and the connectivity target), Beam 2009, Cole 2020/2022 (SAINT). Motor hotspot: Mayka 2006. OCD: Carmi 2018/2019. Smoking: Zangen 2021. Migraine: Lipton 2010. The right-DLPFC point mirrors F3, and the deep-coil targets are atlas-region centres. These are group averages for learning; clinics locate each patient's target individually.</li>
       <li><b>Tracts</b>: the HCP-842 population-averaged tractography atlas (Yeh 2018), as curated into 80 bundles by Eleftherios Garyfallidis (CC BY 4.0). Streamlines are subsampled and simplified for the browser.</li>
     </ul>
     <p>Data were provided [in part] by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.</p>

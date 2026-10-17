@@ -7,6 +7,7 @@ import { cssGradient } from './colormaps.js';
 import { Cortex } from './cortex.js';
 import { MeshGroup } from './meshes.js';
 import { Tracts } from './tracts.js';
+import { TmsTargets } from './tms.js';
 import { VolumeStore, Slices, VolumeRender } from './volume.js';
 import * as ui from './ui.js';
 
@@ -108,6 +109,7 @@ const tracts = new Tracts(man.tracts, brain);
 const store = new VolumeStore(man.volumes);
 const slices = new Slices(store, brain);
 const volume = new VolumeRender(store, brain);
+const tms = new TmsTargets(man.tms, brain);
 const structureGroups = [aseg, massp, thalamic, context];
 
 // Opening view: the white-matter tracts on their own; every other layer loads when first switched on.
@@ -176,7 +178,7 @@ const mm = (v) => `${v > 0 ? '+' : ''}${Math.round(v)} mm`;
   const opts = [{ value: 'none', label: 'Plain', group: 'Shading' }];
   for (const sc of man.cortex.scalars) opts.push({ value: `scalar:${sc.id}`, label: sc.label, group: 'Morphology' });
   const kinds = {
-    dk: 'Anatomical', destrieux: 'Anatomical', hcpmmp: 'Multimodal', brainnetome: 'Connectivity',
+    dk: 'Anatomical', destrieux: 'Anatomical', bodymap: 'Body map', hcpmmp: 'Multimodal', brainnetome: 'Connectivity',
     yeo7: 'Functional networks', yeo17: 'Functional networks', schaefer100: 'Functional networks',
     schaefer400: 'Functional networks', schaefer1000: 'Functional networks',
     lausanne1: 'Multi-scale (Lausanne)', lausanne3: 'Multi-scale (Lausanne)', lausanne5: 'Multi-scale (Lausanne)',
@@ -186,6 +188,8 @@ const mm = (v) => `${v > 0 ? '+' : ''}${Math.round(v)} mm`;
   for (const a of atlases) opts.push({ value: `atlas:${a.id}`, label: a.label, group: kinds[a.id] });
   const desc = ui.note(s.body, '', 'desc');
   const legend = ui.inline(s.body, 'legend');
+  const keys = ui.inline(s.body, 'keys');
+  let labelsBox = null;
   const describe = (v) => {
     const [k, id] = v.split(':');
     const m = k === 'atlas' ? man.cortex.atlases.find((a) => a.id === id)
@@ -196,14 +200,25 @@ const mm = (v) => `${v > 0 ? '+' : ''}${Math.round(v)} mm`;
       const f = (x) => (Math.abs(x) < 10 ? x.toFixed(2) : x.toFixed(0));
       legend.innerHTML = `<span>${f(m.min)}</span><i style="background:${cssGradient(m.cmap)}"></i><span>${f(m.max)}</span>`;
     }
+    keys.hidden = !m?.legend;
+    keys.replaceChildren(...(m?.legend || []).map((l) => {
+      const sw = ui.el('i');
+      sw.style.background = l.color;
+      const key = ui.el('span');
+      key.append(sw, l.name);
+      return key;
+    }));
+    labelsBox?.setEnabled(Boolean(m?.hemis?.L?.anchors));
   };
   ui.select(s.body, 'Colour by', opts, cortex.overlay, (v) => {
     describe(v);
     withBusy('overlay', 'Loading overlay…', cortex.setOverlay(v));
-  }).row.after(desc, legend);
-  describe(cortex.overlay);
+  }).row.after(desc, legend, keys);
   ui.checkbox(s.body, 'Fold shading', true, (v) => { cortex.setFoldShading(v); requestRender(); });
   ui.checkbox(s.body, 'Region outlines', false, (v) => { cortex.setOutlines(v); requestRender(); });
+  labelsBox = ui.checkbox(s.body, 'Labels', true, (v) => { cortex.showLabels = v; requestRender(); });
+  labelsBox.row.title = 'Names on the surface; the body map has them';
+  describe(cortex.overlay);
   const hem = ui.inline(s.body);
   ui.checkbox(hem, 'Left hemisphere', true, (v) => { cortex.setHemiVisible('L', v); requestRender(); });
   ui.checkbox(hem, 'Right hemisphere', true, (v) => { cortex.setHemiVisible('R', v); requestRender(); });
@@ -385,6 +400,20 @@ const labelOpts = [{ value: '', label: 'None' }, ...man.volumes.labels.map((v) =
 
 structureSection(context, 'Context surfaces', { hint: 'Outer hulls of the template brain and head.' });
 
+// TMS targets
+{
+  const s = ui.section(panel, 'TMS targets', {
+    checked: false, hint: man.tms.description,
+    onToggle: (v) => { tms.setVisible(v); requestRender(); },
+  });
+  ui.note(s.body, 'Dot: the brain target · ring: where the coil sits on the scalp. Hover one for details.', 'desc');
+  ui.checkbox(s.body, 'Labels', true, (v) => { tms.showLabels = v; requestRender(); });
+  ui.groupedList(s.body, `Targets (${tms.items.length})`, man.tms.groups.map((g) => [g,
+    tms.items.filter((t) => t.group === g).map((t) => ({
+      label: t.name, swatch: t.color, checked: true, onChange: (v) => { tms.setItemVisible(t, v); requestRender(); },
+    }))]));
+}
+
 // Clipping
 {
   const s = ui.section(panel, 'Cut-away', { hint: 'Clips every 3D layer except the MRI slices.' });
@@ -449,6 +478,7 @@ function isSeeThrough(obj) {
   const u = obj.userData;
   if (u.kind === 'cortex') return cortex.style === 'xray' || cortex.opacity < 0.5;
   if (u.kind === 'structure') return u.group.style === 'xray' || u.group.opacity < 0.5;
+  if (u.kind === 'tms') return Boolean(u.glass);
   return false;
 }
 
@@ -462,6 +492,7 @@ function pick() {
     objs.push(...cortex.meshes.filter((m) => m.visible));
   }
   for (const g of structureGroups) objs.push(...g.pickables());
+  objs.push(...tms.pickables());
   const sliceObjs = slices.pickables();
   objs.push(...sliceObjs);
   raycaster.firstHitOnly = false;
@@ -477,7 +508,7 @@ function pick() {
   const pxMm = (t) => (2 * t * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / canvas.clientHeight;
   const tp = tracts.pick(ray, (t) => 5 * pxMm(t), (x, y, z) => keepPoint(new THREE.Vector3(x, y, z)));
   let info = null;
-  let tractHover = null, structHover = null, cortexHl = null;
+  let tractHover = null, structHover = null, cortexHl = null, tmsHover = null;
   if (tp && (!hit || tp.t < hit.distance + 0.5 || isSeeThrough(hit.object))) {
     tractHover = tp.item;
     info = { ...tracts.describe(tp.item), mni: tp.point };
@@ -492,9 +523,13 @@ function pick() {
       structHover = info;
     } else if (u.kind === 'slice') {
       info = { ...slices.describe(local), mni: local };
+    } else if (u.kind === 'tms') {
+      info = tms.describe(hit);
+      tmsHover = info.item;
     }
   }
   tracts.setHover(tractHover);
+  tms.setHover(tmsHover);
   for (const g of structureGroups) g.setHover(structHover && structHover.group === g ? structHover.item : null);
   cortex.setHighlight(cortexHl);
   showTip(info);
@@ -521,6 +556,49 @@ function showTip(info) {
   tip.style.transform = `translate(${x}px, ${y}px)`;
 }
 
+// ---------------------------------------------------------------------------- labels
+
+// Text labels drawn over the canvas at 3D points. A label hides when its point is cut away, faces away from
+// the camera (labels with a normal) or sits behind solid cortex (labels marked occlude).
+const labelLayer = document.getElementById('labels');
+const labelEls = [];
+const lp = new THREE.Vector3(), lw = new THREE.Vector3(), ln = new THREE.Vector3(), camLocal = new THREE.Vector3();
+const occluder = new THREE.Raycaster();
+
+function updateLabels() {
+  const items = [...cortex.labelItems(), ...tms.labelItems()];
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  brain.worldToLocal(camLocal.copy(camera.position));
+  const cortexHides = cortex.style !== 'xray' && cortex.opacity >= 0.5;
+  let meshes = null;
+  let n = 0;
+  for (const it of items) {
+    lp.fromArray(it.pos);
+    if (!keepPoint(lp)) continue;
+    if (it.normal && ln.fromArray(it.normal).dot(lw.copy(camLocal).sub(lp)) <= 0) continue;
+    lw.copy(lp).applyMatrix4(brain.matrixWorld);
+    if (it.occlude && cortexHides) {
+      if (!meshes) { cortex.prepareRaycast(); meshes = cortex.meshes.filter((m) => m.visible); }
+      const d = camera.position.distanceTo(lw);
+      occluder.set(camera.position, lw.clone().sub(camera.position).divideScalar(d));
+      occluder.far = d - 2;
+      occluder.firstHitOnly = clip.axis === 'off';
+      const hits = occluder.intersectObjects(meshes, false);
+      if (hits.some((x) => keepPoint(brain.worldToLocal(x.point.clone())))) continue;
+    }
+    lw.project(camera);
+    if (lw.z > 1) continue;
+    let e = labelEls[n];
+    if (!e) labelEls.push(e = labelLayer.appendChild(ui.el('div', 'label3d')));
+    n++;
+    if (e.textContent !== it.text) e.textContent = it.text;
+    e.style.borderColor = it.color || '';
+    e.style.transform = `translate(${(lw.x * 0.5 + 0.5) * w}px, ${(-lw.y * 0.5 + 0.5) * h}px) translate(-50%, -50%)`;
+    e.hidden = false;
+  }
+  for (let i = n; i < labelEls.length; i++) labelEls[i].hidden = true;
+}
+
 // ---------------------------------------------------------------------------- loop
 
 renderer.setAnimationLoop(() => {
@@ -528,10 +606,11 @@ renderer.setAnimationLoop(() => {
   if (moved || needsRender) {
     needsRender = false;
     renderer.render(scene, camera);
+    updateLabels();
   }
 });
 
 window.brainview = {
-  THREE, scene, camera, controls, renderer, brain, cortex, aseg, massp, thalamic, context, tracts, slices, volume,
+  THREE, scene, camera, controls, renderer, brain, cortex, aseg, massp, thalamic, context, tracts, slices, volume, tms,
   setView, requestRender, clip, applyClip,
 };

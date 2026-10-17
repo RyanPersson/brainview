@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Convert the downloaded open datasets (raw/) into compact binaries for the web viewer (web/data/).
 
-Usage:  .venv/bin/python -I build/build.py [cortex] [meshes] [tracts] [volumes] [check]
-        (no args = everything)
+Usage:  .venv/bin/python -I build/build.py [cortex] [atlases] [meshes] [tracts] [volumes] [tms] [check]
+        (no args = everything; atlases is the parcellation part of cortex, tms needs the meshes)
 
 Every output array is written as  web/data/<name>.bin.gz  (raw little-endian bytes, gzipped;
 the viewer inflates them itself, so any static host works).  web/data/manifest.json
@@ -227,7 +227,52 @@ ATLASES = [
      "Lausanne 2018, scale 3 (~110 regions per hemisphere)"),
     ("lausanne5", "Lausanne scale 5", "atlas-Lausanne2018_scale-5",
      "Lausanne 2018, finest scale (~500 regions per hemisphere)"),
+    ("bodymap", "Body map (motor & touch strips)", "bodymap",
+     "Which body part each stretch of the motor strip (primary motor cortex, darker) and the touch strip "
+     "(primary somatosensory cortex, lighter) serves, from the body-part subregions of the Brainnetome atlas "
+     "(Fan et al. 2016). This is the order of Penfield's homunculus, though the borders are not sharp. "
+     "Gordon et al. (2023) also found zones between the body parts that plan whole-body actions."),
 ]
+
+# Brainnetome subregions of the primary motor (area 4) and somatosensory (areas 1/2/3) strips, by body part.
+# Touch shares the movement colour, mixed toward white.
+BODYMAP = [
+    # Brainnetome name, body part, strip, colour
+    ("a4ll", "Leg & foot", "movement", "#3d7bd9"),
+    ("a4t", "Trunk", "movement", "#2bb3a0"),
+    ("a4ul", "Arm & hand", "movement", "#e3b22b"),
+    ("a4hf", "Head & face", "movement", "#e0503c"),
+    ("a4tl", "Tongue & throat", "movement", "#b05cd6"),
+    ("a1/2/3ll", "Leg & foot", "touch", "#3d7bd9"),
+    ("a1/2/3tru", "Trunk", "touch", "#2bb3a0"),
+    ("a1/2/3ulhf", "Arm, hand & face", "touch", "#e88a33"),
+    ("a1/2/3tonia", "Tongue & throat", "touch", "#b05cd6"),
+]
+STRIPS = {"movement": "movement · primary motor cortex", "touch": "touch · primary somatosensory cortex"}
+
+
+def body_map(hemi):
+    """Body-map labels on fsaverage from Brainnetome, plus one label anchor per motor body part: the vertex on
+    a gyral crown nearest the centre of that part's crown, so the label sits on visible cortex."""
+    bn, names, _ = read_atlas(hemi, "brainnetome", "atlas-brainnetome")
+    pial = apply_affine(MNI305_TO_152, nib.load(f"{TF_FS}hemi-{hemi}_den-164k_pial.surf.gii").agg_data()[0])
+    sulc = nib.load(f"{TF_FS}hemi-{hemi}_den-164k_sulc.shape.gii").agg_data()
+    comp = np.zeros(len(bn), np.uint16)
+    out_names, out_colors, anchors = ["Rest of the cortex"], ["#8c8c8c"], []
+    for k, (region, part, strip, col) in enumerate(BODYMAP, start=1):
+        m = bn == names.index(region)
+        comp[m] = k
+        rgb = np.array([int(col[i:i + 2], 16) for i in (1, 3, 5)], float)
+        if strip == "touch":
+            rgb = rgb + (255 - rgb) * 0.5
+        out_names.append(f"{part} ({STRIPS[strip]})")
+        out_colors.append(hexcol(rgb))
+        if strip == "movement":
+            crown = np.nonzero(m & (sulc < 0))[0]
+            c = pial[crown].mean(0)
+            anchors.append({"text": part, "color": col,
+                            "vertex": int(crown[np.argmin(((pial[crown] - c) ** 2).sum(1))])})
+    return comp, out_names, out_colors, anchors
 
 
 def atlas_pretty(aid, name):
@@ -387,10 +432,23 @@ def build_cortex(man):
         if sid == "sulc":
             out["shading"] = sid
 
-    # atlases
+    man["cortex"] = out
+    build_atlases(man)
+
+
+def build_atlases(man):
+    """The cortical parcellations (also a step of its own, as it doesn't need the surfaces rebuilt)."""
+    out = man["cortex"]
+    out["atlases"] = []
     for aid, label, key, desc in ATLASES:
         entry = {"id": aid, "label": label, "description": desc, "hemis": {}}
         for h in "LR":
+            if aid == "bodymap":
+                lab, names, colors, anchors = body_map(h)
+                entry["hemis"][h] = {"labels": save(f"cortex/{h}_atlas_{aid}", lab), "names": names,
+                                     "colors": colors, "anchors": anchors}
+                entry["legend"] = [{"name": a["text"], "color": a["color"]} for a in anchors]
+                continue
             lab, names, colors = read_atlas(h, aid, key)
             if aid == "yeo7":
                 names = yeo_names_from_schaefer(h, "7n")
@@ -404,7 +462,6 @@ def build_cortex(man):
         n = len(entry["hemis"]["L"]["names"]) - 1
         log(f"atlas {aid}: {n} labels/hemi")
         out["atlases"].append(entry)
-    man["cortex"] = out
 
 
 # ----------------------------------------------------------------------------- volumetric meshes
@@ -821,6 +878,142 @@ def build_volumes(man):
 
 # ----------------------------------------------------------------------------- checks
 
+# ----------------------------------------------------------------------------- TMS targets
+
+TMS_GROUPS = {"Setting the dose": "#e9edf2", "Depression": "#ffb340", "OCD": "#5cc8ff",
+              "Smoking cessation": "#7ddc6f", "Migraine": "#d39cff"}
+
+# Published targets. "mni"/"tal" points are snapped to the nearest cortical vertex; "region" targets are the
+# centre of an atlas region on each listed hemisphere (deep-TMS coils reach a broad area around it).
+TMS_TARGETS = [
+    {"id": "m1_hand", "name": "Motor hotspot (hand)", "group": "Setting the dose", "tal": (-37, -21, 58),
+     "use": "Single pulses here make the thumb or index finger twitch. The weakest pulse that does it (the motor "
+            "threshold) sets the strength of every treatment session.",
+     "how": "Found by moving the coil over the scalp while watching the hand.",
+     "coil": "Figure-8 coil",
+     "source": "Peak of primary motor cortex in a meta-analysis of motor imaging studies (Mayka et al. 2006), "
+               "Talairach −37, −21, 58 converted to MNI"},
+    {"id": "dlpfc_5cm", "name": "Left DLPFC: 5-cm rule", "group": "Depression", "mni": (-41, 16, 54),
+     "use": "The target of the trials behind the first FDA clearance of TMS for depression (2008).",
+     "how": "5 cm forward along the scalp from the motor hotspot. In many heads this lands farther back than "
+            "intended, on premotor cortex.",
+     "coil": "Figure-8 coil",
+     "source": "Average of published 5-cm sites (Fox et al. 2012)"},
+    {"id": "dlpfc_f3", "name": "Left DLPFC: F3", "group": "Depression", "mni": (-37, 26, 49),
+     "use": "A common depression target where MRI guidance isn't used.",
+     "how": "F3 is a position of the EEG 10–20 system, found with tape-measure head measurements (the Beam F3 "
+            "method, Beam et al. 2009).",
+     "coil": "Figure-8 coil",
+     "source": "Cortex under F3 (Herwig et al. 2003, as tabulated by Fox et al. 2012)"},
+    {"id": "dlpfc_conn", "name": "Left DLPFC: connectivity target", "group": "Depression", "mni": (-38, 44, 26),
+     "use": "Published left-DLPFC sites worked better the more their activity runs opposite to the subgenual "
+            "cingulate's. This is the group-average best site.",
+     "how": "Reached with MRI neuronavigation. The accelerated SAINT/SNT protocol finds each patient's own version "
+            "from their fMRI (Cole et al. 2020, 2022).",
+     "coil": "Figure-8 coil",
+     "source": "Fox et al. 2012"},
+    {"id": "dlpfc_right", "name": "Right DLPFC: F4", "group": "Depression", "mni": (37, 26, 49),
+     "use": "Slow (1 Hz), calming stimulation here is an alternative or an addition to left-sided treatment.",
+     "how": "F4 is the right-hand twin of F3 in the 10–20 system. Shown here as the mirror image of the F3 site.",
+     "coil": "Figure-8 coil",
+     "source": "Mirror of the F3 site (Herwig et al. 2003)"},
+    {"id": "ocd", "name": "Medial prefrontal & anterior cingulate", "group": "OCD",
+     "region": ("dk", "caudalanteriorcingulate", "LR"), "scalp": "ocd",
+     "use": "Deep TMS with the H7 coil, FDA-cleared as an add-on treatment for OCD (2018).",
+     "how": "The coil sits on the midline, 4 cm in front of the spot that makes the leg twitch.",
+     "coil": "H7 deep-TMS coil",
+     "source": "Carmi et al. 2018, 2019"},
+    {"id": "smoking", "name": "Insula & lateral prefrontal cortex", "group": "Smoking cessation",
+     "region": ("dk", "insula", "LR"),
+     "use": "Deep TMS with the H4 coil, FDA-cleared in 2020 as a short-term aid to quitting smoking. It reaches "
+            "the lateral prefrontal cortex and the insula on both sides.",
+     "how": "The coil is a helmet; its position is set from the motor hotspot.",
+     "coil": "H4 deep-TMS coil",
+     "source": "Zangen et al. 2021"},
+    {"id": "migraine", "name": "Occipital cortex", "group": "Migraine",
+     "region": ("destrieux", "Pole_occipital", "LR"),
+     "use": "A handheld single-pulse device, FDA-cleared for migraine with aura (2013). The pulse is thought to "
+            "interrupt the wave of cortical activity behind the aura.",
+     "how": "Held against the back of the head by the patient at the start of an attack.",
+     "coil": "Handheld single-pulse device",
+     "source": "Lipton et al. 2010"},
+]
+
+
+def tal_to_mni(p):
+    """Talairach -> MNI by inverting Brett's mni2tal (above the AC), the conversion Mayka et al. 2006 used."""
+    y, z = np.linalg.solve([[0.9688, 0.0460], [-0.0485, 0.9189]], [p[1], p[2]])
+    return np.array([p[0] / 0.99, y, z])
+
+
+def load_saved(desc):
+    """Read back an array written by save()/save_quantized()."""
+    with open(os.path.join(ROOT, "web", desc["url"]), "rb") as fh:
+        a = np.frombuffer(gzip.decompress(fh.read()), dtype=desc["dtype"])
+    return np.asarray(desc["min"]) + a.reshape(-1, 3) * np.asarray(desc["scale"]) if "scale" in desc else a
+
+
+def build_tms(man):
+    """Place the published TMS targets on the cortex, and each coil position on the scalp (the head surface)."""
+    pial, atl = {}, {}
+    for h in "LR":
+        pial[h] = apply_affine(MNI305_TO_152, nib.load(f"{TF_FS}hemi-{h}_den-164k_pial.surf.gii").agg_data()[0])
+        for aid, key in (("dk", "atlas-Desikan2006_seg-aparc_desc-curated"), ("destrieux", "atlas-Destrieux2009"),
+                         ("brainnetome", "atlas-brainnetome")):
+            atl[aid, h] = read_atlas(h, aid, key)[:2]
+
+    g = next(g for g in man["meshGroups"] if g["id"] == "context")
+    it = next(s for s in g["structures"] if s["id"] == "hull_head")
+    hv = load_saved(g["positions"])[it["vStart"]:it["vStart"] + it["vCount"]]
+    hf = load_saved(g["indices"]).reshape(-1, 3)[it["iStart"] // 3:(it["iStart"] + it["iCount"]) // 3] - it["vStart"]
+    hn = np.zeros_like(hv)
+    fn = np.cross(hv[hf[:, 1]] - hv[hf[:, 0]], hv[hf[:, 2]] - hv[hf[:, 0]])
+    for k in range(3):
+        np.add.at(hn, hf[:, k], fn)
+    hn /= np.linalg.norm(hn, axis=1, keepdims=True)
+
+    def scalp(p):
+        i = int(np.argmin(((hv - p) ** 2).sum(1)))
+        return hv[i], hn[i]
+
+    def region_centre(aid, name, h):
+        lab, names = atl[aid, h]
+        return pial[h][lab == [n.lower() for n in names].index(name.lower())].mean(0)
+
+    rnd = lambda a: [round(float(x), 2) for x in a]
+    targets = []
+    for t in TMS_TARGETS:
+        points = []
+        if "region" in t:
+            aid, name, hemis = t["region"]
+            centres = [region_centre(aid, name, h) for h in hemis]
+            if t["id"] in ("ocd", "migraine"):  # one midline target for both hemispheres
+                centres = [np.mean(centres, 0) * [0, 1, 1]]
+            mni = None
+        else:
+            mni = tal_to_mni(t["tal"]) if "tal" in t else np.array(t["mni"], float)
+            h = "L" if mni[0] < 0 else "R"
+            centres = [pial[h][np.argmin(((pial[h] - mni) ** 2).sum(1))]]
+        for c in centres:
+            if t.get("scalp") == "ocd":
+                # the leg spot (scalp over Brainnetome's leg motor area, both hemispheres), then 4 cm forward
+                # along the midline
+                leg, _ = scalp(np.mean([region_centre("brainnetome", "a4ll", h) for h in "LR"], 0) * [0, 1, 1])
+                mid = np.nonzero((np.abs(hv[:, 0]) < 3) & (hv[:, 1] > leg[1]))[0]
+                i = mid[np.argmin(np.abs(np.linalg.norm(hv[mid] - leg, axis=1) - 40))]
+                s, n = hv[i], hn[i]
+            else:
+                s, n = scalp(c)
+            points.append({"cortex": rnd(c), "scalp": rnd(s), "normal": rnd(n)})
+        targets.append({k: t[k] for k in ("id", "name", "group", "use", "how", "coil", "source")} |
+                       {"color": TMS_GROUPS[t["group"]], "broad": "region" in t,
+                        "mni": rnd(mni) if mni is not None else None, "points": points})
+        log(f"tms {t['id']}: " + "; ".join(f"cortex {p['cortex']} scalp {p['scalp']}" for p in points))
+    man["tms"] = {"description": "Where common TMS treatments aim, from published studies. Positions are group "
+                                 "averages on the template brain. Clinics find each patient's own target.",
+                  "groups": list(TMS_GROUPS), "targets": targets}
+
+
 def check_alignment():
     """Mean GM probability sampled at fsaverage mid-thickness vertices, with/without MNI305->152."""
     img = nib.load(TF_MNI + "res-01_label-GM_probseg.nii.gz")
@@ -845,7 +1038,7 @@ def check_alignment():
 
 
 def main():
-    steps = sys.argv[1:] or ["cortex", "meshes", "tracts", "volumes"]
+    steps = sys.argv[1:] or ["cortex", "meshes", "tracts", "volumes", "tms"]
     os.makedirs(OUT, exist_ok=True)
     if "check" in steps:
         check_alignment()
@@ -853,7 +1046,8 @@ def main():
     man = load_manifest()
     man["frame"] = "MNI152NLin2009cAsym (RAS, mm)"
     for s in steps:
-        {"cortex": build_cortex, "meshes": build_meshes, "tracts": build_tracts, "volumes": build_volumes}[s](man)
+        {"cortex": build_cortex, "atlases": build_atlases, "meshes": build_meshes, "tracts": build_tracts,
+         "volumes": build_volumes, "tms": build_tms}[s](man)
         with open(MANIFEST_PATH, "w") as fh:
             json.dump(man, fh, indent=1)
     log("done")
