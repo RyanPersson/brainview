@@ -1,0 +1,8 @@
+Brainnetome cortical parcellation (Fan et al. 2016, https://doi.org/10.1093/cercor/bhw157), on
+fsaverage, obtained through TemplateFlow. Brainview redistributes it, converted to per-vertex labels,
+under the same terms, which are quoted from the atlas metadata:
+
+The atlas' data and metadata are the property of the Brainnetome Center. The Brainnetome makes this information available to researchers, scientists and others at colleges, universities, not-for-profit foundations and other similar institutions free of charge, subject to proper attribution and an agreement to share alike, for use for non-commercial purposes. Brainetome Center will consider granting a license to individuals and entities that wish to use the information, images and data for commercial purposes. Such requests should be made to Dr. Lingzhong Fan by e-mail:brainnetome.atlas@nlpr.ia.ac.cn
+
+The Brainnetome atlas was built from WU-Minn Human Connectome Project data, so the HCP Open Access
+Data Use Terms (HCP-Open-Access-Data-Use-Terms.txt) apply as well.

@@ -1,0 +1,62 @@
+# Data credits and licenses
+
+Everything in `web/data/` is derived from the open datasets below, and each one stays under its
+own terms. None of the files are the originals. Brainview has converted all of them to compact
+binaries, moved the surfaces from MNI305 into MNI152 space, quantized positions to 16 bits and
+intensities to 8 bits, and turned label maps into colour-table indices. It has also computed the
+inflated surfaces, the pial–white distance map and every 3D mesh from the volumes, and subsampled
+and simplified the streamlines.
+
+The license texts that have to travel with the data are in [`web/licenses/`](web/licenses/), so
+they're deployed with the site as well.
+
+## Human Connectome Project
+
+Data were provided [in part] by the Human Connectome Project, WU-Minn Consortium (Principal
+Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and
+Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for
+Systems Neuroscience at Washington University.
+
+Four layers are derived from WU-Minn HCP Open Access data: the Glasser HCP-MMP1 parcellation, the
+HCP-842 tracts, the MIAL thalamic nuclei and the Brainnetome parcellation. Brainview redistributes
+them under the same
+[WU-Minn HCP Open Access Data Use Terms](https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms)
+([copy](web/licenses/HCP-Open-Access-Data-Use-Terms.txt)). Anyone who reuses these files must:
+
+- not try to identify or contact the people who were scanned;
+- pass the data on only under the same terms;
+- include the acknowledgment above in public presentations.
+
+## Datasets
+
+| Data | Used for | License / terms | Cite |
+|---|---|---|---|
+| FreeSurfer *fsaverage*: pial, white and sphere surfaces, sulc, curv | Cortex shapes, depth and curvature colours | [FreeSurfer license](web/licenses/FreeSurfer.txt) | Fischl et al. 1999, [doi:10.1002/(SICI)1097-0193(1999)8:4<272::AID-HBM10>3.0.CO;2-4](https://doi.org/10.1002/(SICI)1097-0193(1999)8:4%3C272::AID-HBM10%3E3.0.CO;2-4) |
+| Desikan–Killiany atlas (FreeSurfer 7) | Cortex colours | [FreeSurfer license](web/licenses/FreeSurfer.txt) | Desikan et al. 2006, [doi:10.1016/j.neuroimage.2006.01.021](https://doi.org/10.1016/j.neuroimage.2006.01.021) |
+| Destrieux atlas (FreeSurfer 7) | Cortex colours | [FreeSurfer license](web/licenses/FreeSurfer.txt) | Destrieux et al. 2010, [doi:10.1016/j.neuroimage.2010.06.010](https://doi.org/10.1016/j.neuroimage.2010.06.010) |
+| Yeo 7/17 networks (FreeSurfer 7) | Cortex colours | [FreeSurfer license](web/licenses/FreeSurfer.txt) | Yeo et al. 2011, [doi:10.1152/jn.00338.2011](https://doi.org/10.1152/jn.00338.2011) |
+| Schaefer 2018, 100/400/1000 parcels | Cortex colours | MIT ([CBIG](https://github.com/ThomasYeoLab/CBIG)) | Schaefer et al. 2018, [doi:10.1093/cercor/bhx179](https://doi.org/10.1093/cercor/bhx179) |
+| Lausanne 2018, scales 1/3/5 (Alemán-Gómez, Cammoun, Hagmann) | Cortex colours | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Cammoun et al. 2012, [doi:10.1016/j.jneumeth.2011.09.031](https://doi.org/10.1016/j.jneumeth.2011.09.031) |
+| Brainnetome cortical parcellation | Cortex colours | [Non-commercial, share-alike](web/licenses/Brainnetome.txt) + HCP terms | Fan et al. 2016, [doi:10.1093/cercor/bhw157](https://doi.org/10.1093/cercor/bhw157) |
+| HCP-MMP1.0 projected on fsaverage, by Kathryn Mills | Cortex colours (Glasser) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) + HCP terms | Glasser et al. 2016, [doi:10.1038/nature18933](https://doi.org/10.1038/nature18933); Mills 2016, [doi:10.6084/m9.figshare.3498446.v2](https://doi.org/10.6084/m9.figshare.3498446.v2) |
+| ICBM 2009c nonlinear asymmetric template: T1, T2, GM/WM/CSF probabilities, brain and head masks | MRI slices, volume rendering, brain hull and head meshes | [MNI notice](web/licenses/MNI-ICBM152.txt) | Fonov et al. 2011, [doi:10.1016/j.neuroimage.2010.07.033](https://doi.org/10.1016/j.neuroimage.2010.07.033); Fonov et al. 2009, [doi:10.1016/S1053-8119(09)70884-5](https://doi.org/10.1016/S1053-8119(09)70884-5) |
+| aseg segmentation of that template (made with FreeSurfer, distributed by TemplateFlow) | Subcortical structures, label overlay | [MNI notice](web/licenses/MNI-ICBM152.txt); label names and colours from FreeSurferColorLUT ([FreeSurfer license](web/licenses/FreeSurfer.txt)) | as for the template |
+| MASSP 2.0 subcortical atlas (Bazin, Alkemade, Forstmann, Miletic) | Subcortical nuclei | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Bazin et al. 2025, [doi:10.1162/imag_a_00560](https://doi.org/10.1162/imag_a_00560) |
+| MIAL thalamic nuclei atlas | Thalamic nuclei | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) + HCP terms | Najdenovska et al. 2018, [doi:10.1038/sdata.2018.270](https://doi.org/10.1038/sdata.2018.270) |
+| Advanced Atlas of 80 Bundles in MNI space, © Eleftherios Garyfallidis, curated from the HCP-842 atlas | White-matter tracts | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) + HCP terms | Yeh et al. 2018, [doi:10.1016/j.neuroimage.2018.05.027](https://doi.org/10.1016/j.neuroimage.2018.05.027); Garyfallidis et al. 2018, [doi:10.1016/j.neuroimage.2017.07.015](https://doi.org/10.1016/j.neuroimage.2017.07.015) |
+
+Where the files came from:
+
+- The fsaverage and MNI152NLin2009cAsym data came from [TemplateFlow](https://www.templateflow.org)
+  (Ciric et al. 2022, [doi:10.1038/s41592-022-01681-2](https://doi.org/10.1038/s41592-022-01681-2)).
+- The HCP-MMP1 annotation came from figshare.
+- The 80 bundles came from figshare, through DIPY's fetcher. The bundles are in ICBM 2009a space
+  and are shown in 2009c without resampling.
+
+The FreeSurfer license notes that this data was made for research and is not meant for clinical
+use. Brainview is the same: it's for learning and exploring, not for diagnosis.
+
+## Libraries
+
+[three.js](https://threejs.org) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh)
+are vendored in `web/vendor/` with their MIT license files.

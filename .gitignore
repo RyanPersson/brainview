@@ -1,0 +1,8 @@
+# downloaded source datasets (~740 MB); re-fetch as described in README.md
+raw/
+# local environments
+.venv/
+node_modules/
+__pycache__/
+# headless screenshots from tools/shot.mjs
+out/

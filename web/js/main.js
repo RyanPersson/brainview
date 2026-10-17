@@ -1,0 +1,537 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
+import { fetchManifest } from './data.js';
+import { clipPlanes } from './materials.js';
+import { cssGradient } from './colormaps.js';
+import { Cortex } from './cortex.js';
+import { MeshGroup } from './meshes.js';
+import { Tracts } from './tracts.js';
+import { VolumeStore, Slices, VolumeRender } from './volume.js';
+import * as ui from './ui.js';
+
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
+// ---------------------------------------------------------------------------- scene
+
+const canvas = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.localClippingEnabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0c0f14');
+const camera = new THREE.PerspectiveCamera(30, 1, 2, 4000);
+scene.add(camera);
+scene.add(new THREE.HemisphereLight('#dfe8ff', '#2a2622', 1.1));
+const key = new THREE.DirectionalLight('#ffffff', 2.1);
+key.position.set(0.35, 0.6, 1);
+camera.add(key);
+camera.add(key.target);
+key.target.position.set(0, 0, -1);
+
+// All data is in MNI152 RAS millimetres; rotate so superior (+z) is screen-up (+y).
+const brain = new THREE.Group();
+brain.rotation.x = -Math.PI / 2;
+scene.add(brain);
+brain.updateMatrixWorld(true);
+const CENTER = new THREE.Vector3(0, -18, 12); // MNI
+const toWorld = (v) => v.clone().applyMatrix4(brain.matrixWorld);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.12;
+controls.rotateSpeed = 0.8;
+controls.minDistance = 30;
+controls.maxDistance = 1600;
+controls.autoRotateSpeed = 1.2;
+
+let needsRender = true;
+const requestRender = () => { needsRender = true; };
+controls.addEventListener('change', requestRender);
+
+// Keep the brain centred in the part of the window the panel doesn't cover.
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const panelW = document.body.classList.contains('panel-hidden') ? 0 : document.getElementById('panel').offsetWidth + 10;
+  const shift = w > 700 ? panelW / 2 : 0;
+  camera.setViewOffset(w, h, -shift, 0, w, h);
+  camera.updateProjectionMatrix();
+  requestRender();
+}
+new ResizeObserver(resize).observe(canvas);
+
+const VIEWS = {
+  Left: [-1, 0, 0], Right: [1, 0, 0], Front: [0, 1, 0], Back: [0, -1, 0],
+  Top: [0, -0.001, 1], Bottom: [0, 0.001, -1], Oblique: [-0.78, 0.42, 0.42],
+};
+function setView(name, dist) {
+  const d = new THREE.Vector3(...VIEWS[name]).normalize();
+  const target = toWorld(CENTER);
+  const r = dist ?? camera.position.distanceTo(controls.target);
+  const dirWorld = d.applyQuaternion(brain.quaternion);
+  controls.target.copy(target);
+  camera.position.copy(target).addScaledVector(dirWorld, r);
+  camera.lookAt(target);
+  controls.update();
+  requestRender();
+}
+
+// ---------------------------------------------------------------------------- status
+
+const statusEl = document.getElementById('status');
+const busy = new Map();
+function setBusy(key, text) {
+  if (text) busy.set(key, text); else busy.delete(key);
+  statusEl.textContent = [...busy.values()].join(' · ');
+  statusEl.hidden = busy.size === 0;
+}
+async function withBusy(key, text, p) {
+  setBusy(key, text);
+  try { return await p; } finally { setBusy(key, null); requestRender(); }
+}
+
+// ---------------------------------------------------------------------------- app
+
+const man = await fetchManifest();
+const cortex = new Cortex(man.cortex, brain);
+const groups = Object.fromEntries(man.meshGroups.map((g) => [g.id, g]));
+const aseg = new MeshGroup(groups.aseg, brain);
+const massp = new MeshGroup(groups.massp, brain);
+const thalamic = new MeshGroup(groups.thalamic, brain);
+const context = new MeshGroup(groups.context, brain, { style: 'xray' });
+const tracts = new Tracts(man.tracts, brain);
+const store = new VolumeStore(man.volumes);
+const slices = new Slices(store, brain);
+const volume = new VolumeRender(store, brain);
+const structureGroups = [aseg, massp, thalamic, context];
+
+// Opening view: the white-matter tracts on their own; every other layer loads when first switched on.
+setView('Left', 430);
+tracts.setVisible(true);
+await withBusy('tracts', 'Loading tracts…', tracts.load());
+document.getElementById('loading').remove();
+
+// ---------------------------------------------------------------------------- clipping
+
+const clip = { axis: 'off', pos: { x: 0, y: -18, z: 10 }, flip: false };
+const localPlane = new THREE.Plane();
+function applyClip() {
+  clipPlanes.length = 0;
+  if (clip.axis === 'off') {
+    volume.setClip(null);
+  } else {
+    const n = new THREE.Vector3(clip.axis === 'x' ? 1 : 0, clip.axis === 'y' ? 1 : 0, clip.axis === 'z' ? 1 : 0);
+    const s = clip.flip ? 1 : -1; // default keeps the low side (left / back / bottom)
+    localPlane.set(n.multiplyScalar(s), -s * clip.pos[clip.axis]);
+    clipPlanes.push(localPlane.clone().applyMatrix4(brain.matrixWorld));
+    volume.setClip(localPlane);
+  }
+  requestRender();
+}
+const keepPoint = (p) => clip.axis === 'off' || localPlane.distanceToPoint(p) >= -1e-3;
+
+// ---------------------------------------------------------------------------- panel
+
+const panel = document.getElementById('panel-body');
+const { bounds } = store;
+const mm = (v) => `${v > 0 ? '+' : ''}${Math.round(v)} mm`;
+
+// Cortex
+{
+  const s = ui.section(panel, 'Cortex', {
+    checked: false,
+    onToggle: (v) => {
+      cortex.setVisible(v);
+      if (v) {
+        withBusy('cortex', 'Loading cortex…', cortex.load()).then(() =>
+          // build the bounds trees while idle so the first hover doesn't stall
+          (window.requestIdleCallback || setTimeout)(() => cortex.prepareRaycast()));
+      }
+      requestRender();
+    },
+  });
+  const shapeNames = man.cortex.surfaces.map((x) => x.label);
+  const sl = ui.slider(s.body, 'Surface', {
+    min: 0, max: shapeNames.length - 1, step: 0.01, value: 0,
+    format: (v) => {
+      const i = Math.round(v);
+      return Math.abs(v - i) < 0.04 ? shapeNames[i] : `${shapeNames[Math.floor(v)]} → ${shapeNames[Math.ceil(v)]}`;
+    },
+    onInput: (v) => { cortex.setShape(v); requestRender(); },
+  });
+  sl.row.classList.add('wide');
+  const ticks = ui.inline(s.body, 'ticks');
+  shapeNames.forEach((n, i) => {
+    const b = ui.el('button', '', n);
+    b.type = 'button';
+    b.addEventListener('click', () => { sl.set(i); cortex.setShape(i); requestRender(); });
+    ticks.append(b);
+  });
+
+  const opts = [{ value: 'none', label: 'Plain', group: 'Shading' }];
+  for (const sc of man.cortex.scalars) opts.push({ value: `scalar:${sc.id}`, label: sc.label, group: 'Morphology' });
+  const kinds = {
+    dk: 'Anatomical', destrieux: 'Anatomical', hcpmmp: 'Multimodal', brainnetome: 'Connectivity',
+    yeo7: 'Functional networks', yeo17: 'Functional networks', schaefer100: 'Functional networks',
+    schaefer400: 'Functional networks', schaefer1000: 'Functional networks',
+    lausanne1: 'Multi-scale (Lausanne)', lausanne3: 'Multi-scale (Lausanne)', lausanne5: 'Multi-scale (Lausanne)',
+  };
+  const atlases = [...man.cortex.atlases].sort((a, b) =>
+    Object.values(kinds).indexOf(kinds[a.id]) - Object.values(kinds).indexOf(kinds[b.id]));
+  for (const a of atlases) opts.push({ value: `atlas:${a.id}`, label: a.label, group: kinds[a.id] });
+  const desc = ui.note(s.body, '', 'desc');
+  const legend = ui.inline(s.body, 'legend');
+  const describe = (v) => {
+    const [k, id] = v.split(':');
+    const m = k === 'atlas' ? man.cortex.atlases.find((a) => a.id === id)
+      : k === 'scalar' ? man.cortex.scalars.find((a) => a.id === id) : null;
+    desc.textContent = m ? m.description : 'Uniform grey; fold shading shows sulci (dark) and gyri (light).';
+    legend.hidden = k !== 'scalar';
+    if (k === 'scalar') {
+      const f = (x) => (Math.abs(x) < 10 ? x.toFixed(2) : x.toFixed(0));
+      legend.innerHTML = `<span>${f(m.min)}</span><i style="background:${cssGradient(m.cmap)}"></i><span>${f(m.max)}</span>`;
+    }
+  };
+  ui.select(s.body, 'Colour by', opts, cortex.overlay, (v) => {
+    describe(v);
+    withBusy('overlay', 'Loading overlay…', cortex.setOverlay(v));
+  }).row.after(desc, legend);
+  describe(cortex.overlay);
+  ui.checkbox(s.body, 'Fold shading', true, (v) => { cortex.setFoldShading(v); requestRender(); });
+  ui.checkbox(s.body, 'Region outlines', false, (v) => { cortex.setOutlines(v); requestRender(); });
+  const hem = ui.inline(s.body);
+  ui.checkbox(hem, 'Left hemisphere', true, (v) => { cortex.setHemiVisible('L', v); requestRender(); });
+  ui.checkbox(hem, 'Right hemisphere', true, (v) => { cortex.setHemiVisible('R', v); requestRender(); });
+  ui.select(s.body, 'Style', [{ value: 'solid', label: 'Solid' }, { value: 'xray', label: 'Glass (x-ray)' }], 'solid',
+    (v) => { cortex.setStyle(v); requestRender(); });
+  ui.slider(s.body, 'Opacity', {
+    min: 0.05, max: 1, step: 0.01, value: 1, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { cortex.setOpacity(v); requestRender(); },
+  });
+}
+
+// Structure groups (aseg / nuclei / thalamus / context)
+function structureSection(g, title, { hint, open = false, defaultOn = false } = {}) {
+  const s = ui.section(panel, title, {
+    checked: defaultOn, open, hint,
+    onToggle: (v) => { g.setVisible(v); if (v) withBusy(g.desc.id, `Loading ${title.toLowerCase()}…`, g.load()); requestRender(); },
+  });
+  ui.select(s.body, 'Style', [{ value: 'solid', label: 'Solid' }, { value: 'xray', label: 'Glass (x-ray)' }], g.style,
+    (v) => { g.setStyle(v); requestRender(); });
+  ui.slider(s.body, 'Opacity', {
+    min: 0.05, max: 1, step: 0.01, value: g.opacity, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { g.setOpacity(v); requestRender(); },
+  });
+  // rows merge left/right copies of a structure; the hemisphere boxes filter by side
+  const sides = { L: true, R: true };
+  const byName = new Map();
+  for (const it of g.items) {
+    const k = it.name;
+    if (!byName.has(k)) byName.set(k, { name: k, category: it.category, color: it.color, items: [], on: it.on });
+    byName.get(k).items.push(it);
+  }
+  const rows = [...byName.values()];
+  const apply = () => {
+    for (const r of rows) for (const it of r.items) g.setItemVisible(it, r.on && (it.hemi === '' || sides[it.hemi]));
+    requestRender();
+  };
+  if (g.items.some((it) => it.hemi)) {
+    const hem = ui.inline(s.body);
+    ui.checkbox(hem, 'Left', true, (v) => { sides.L = v; apply(); });
+    ui.checkbox(hem, 'Right', true, (v) => { sides.R = v; apply(); });
+  }
+  const cats = [...new Set(rows.map((r) => r.category))];
+  ui.groupedList(s.body, `Structures (${rows.length})`, cats.map((c) => [cats.length > 1 ? c : '',
+    rows.filter((r) => r.category === c).map((r) => ({
+      label: r.name, swatch: r.color, checked: r.on, onChange: (v) => { r.on = v; apply(); },
+    }))]));
+  g.load = ((orig) => () => orig.call(g).then(apply))(g.load);
+  return s;
+}
+structureSection(aseg, 'Subcortical structures', {
+  hint: 'Surfaces extracted from the FreeSurfer-style segmentation of the MNI152 2009c template.',
+});
+structureSection(massp, 'Subcortical nuclei (MASSP)', {
+  hint: '63 small nuclei, hippocampal subfields and fibre landmarks from the MASSP atlas.',
+});
+structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per thalamus (MIAL atlas).' });
+
+// Tracts
+{
+  const s = ui.section(panel, 'White-matter tracts', {
+    checked: true, open: true, hint: man.tracts.description,
+    onToggle: (v) => { tracts.setVisible(v); if (v) withBusy('tracts', 'Loading tracts…', tracts.load()); requestRender(); },
+  });
+  const key = ui.note(s.body, 'Red: left–right · green: front–back · blue: up–down', 'desc');
+  ui.select(s.body, 'Colour by', [
+    { value: '0', label: 'Fibre direction' }, { value: '1', label: 'Bundle' }], '0',
+  (v) => { tracts.mode = +v; key.hidden = v !== '0'; tracts.apply(); requestRender(); }).row.after(key);
+  ui.slider(s.body, 'Width', {
+    min: 0.1, max: 2, step: 0.05, value: tracts.width, format: (v) => `${v.toFixed(2)} mm`,
+    onInput: (v) => { tracts.width = v; tracts.apply(); requestRender(); },
+  });
+  ui.slider(s.body, 'Density', {
+    min: 0.02, max: 1, step: 0.01, value: tracts.density, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { tracts.density = v; tracts.apply(); requestRender(); },
+  });
+  ui.slider(s.body, 'Opacity', {
+    min: 0.05, max: 1, step: 0.01, value: 1, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { tracts.opacity = v; tracts.apply(); requestRender(); },
+  });
+  const sides = { L: true, R: true };
+  const byName = new Map();
+  for (const b of tracts.items) {
+    if (!byName.has(b.name)) byName.set(b.name, { name: b.name, category: b.category, color: b.color, items: [], on: true });
+    byName.get(b.name).items.push(b);
+  }
+  const rows = [...byName.values()];
+  const apply = () => {
+    for (const r of rows) for (const b of r.items) b.on = r.on && (b.hemi === '' || sides[b.hemi]);
+    tracts.apply();
+    requestRender();
+  };
+  const hem = ui.inline(s.body);
+  ui.checkbox(hem, 'Left', true, (v) => { sides.L = v; apply(); });
+  ui.checkbox(hem, 'Right', true, (v) => { sides.R = v; apply(); });
+  const cats = ui.inline(s.body, 'cats');
+  for (const c of man.tracts.categories) {
+    ui.checkbox(cats, c, true, (v) => { tracts.catOn[c] = v; tracts.apply(); requestRender(); });
+  }
+  ui.groupedList(s.body, `Bundles (${rows.length})`, man.tracts.categories.map((c) => [c,
+    rows.filter((r) => r.category === c).map((r) => ({
+      label: r.name, swatch: r.color, checked: true, onChange: (v) => { r.on = v; apply(); },
+    }))]));
+}
+
+// Volume slices
+const imageOpts = man.volumes.scalars.map((v) => ({ value: v.id, label: v.label }));
+const labelOpts = [{ value: '', label: 'None' }, ...man.volumes.labels.map((v) => ({ value: v.id, label: v.label }))];
+{
+  let loaded = false;
+  const s = ui.section(panel, 'MRI slices', {
+    checked: false, hint: 'Orthogonal planes through the MNI152 2009c template volumes (1 mm).',
+    onToggle: (v) => {
+      slices.setVisible(v);
+      if (v && !loaded) {
+        loaded = true;
+        withBusy('slices', 'Loading volume…', Promise.all([slices.setImage('t1brain'), slices.setLabels('')]));
+      }
+      requestRender();
+    },
+  });
+  ui.select(s.body, 'Image', [{ value: '', label: 'None' }, ...imageOpts], 't1brain',
+    (v) => withBusy('slices', 'Loading volume…', slices.setImage(v)));
+  ui.select(s.body, 'Labels', labelOpts, '', (v) => withBusy('slices', 'Loading labels…', slices.setLabels(v)));
+  ui.slider(s.body, 'Label opacity', {
+    min: 0, max: 1, step: 0.01, value: 0.6, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { slices.setLabelAlpha(v); requestRender(); },
+  });
+  const win = { lo: 0, hi: 1 };
+  ui.slider(s.body, 'Black level', {
+    min: 0, max: 1, step: 0.01, value: 0, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { win.lo = v; slices.setWindow(win.lo, win.hi); requestRender(); },
+  });
+  ui.slider(s.body, 'White level', {
+    min: 0, max: 1, step: 0.01, value: 1, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { win.hi = v; slices.setWindow(win.lo, win.hi); requestRender(); },
+  });
+  for (const [axis, name] of [['z', 'Axial'], ['y', 'Coronal'], ['x', 'Sagittal']]) {
+    const i = 'xyz'.indexOf(axis);
+    const line = ui.inline(s.body, 'slice-row');
+    ui.checkbox(line, name, true, (v) => { slices.setPlaneVisible(axis, v); requestRender(); });
+    ui.slider(line, '', {
+      min: Math.ceil(bounds.lo[i]), max: Math.floor(bounds.hi[i]), step: 1, value: slices.pos[axis], format: mm,
+      onInput: (v) => { slices.setPosition(axis, v); requestRender(); },
+    });
+  }
+}
+
+// Volume rendering
+{
+  let loaded = false;
+  const s = ui.section(panel, 'Volume rendering', {
+    checked: false, hint: 'Ray-marched rendering of a template volume, directly from the voxels.',
+    onToggle: (v) => {
+      volume.setVisible(v);
+      if (v && !loaded) { loaded = true; withBusy('volume', 'Loading volume…', volume.setImage('t1brain')); }
+      requestRender();
+    },
+  });
+  ui.select(s.body, 'Image', imageOpts, 't1brain', (v) => withBusy('volume', 'Loading volume…', volume.setImage(v)));
+  let density;
+  ui.select(s.body, 'Mode', [
+    { value: '0', label: 'Iso-surface' }, { value: '1', label: 'Translucent' }, { value: '2', label: 'Maximum intensity' }],
+  '0', (v) => { volume.setMode(+v); density.setEnabled(v === '1'); requestRender(); });
+  ui.slider(s.body, 'Threshold', {
+    min: 0.01, max: 0.99, step: 0.01, value: 0.3, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { volume.uniforms.uThreshold.value = v; requestRender(); },
+  });
+  density = ui.slider(s.body, 'Density', {
+    min: 0.01, max: 1.5, step: 0.01, value: 0.25, format: (v) => v.toFixed(2),
+    onInput: (v) => { volume.uniforms.uDensity.value = v; requestRender(); },
+  });
+  density.setEnabled(false);
+  ui.select(s.body, 'Colour by', labelOpts.map((o) => (o.value ? o : { value: '', label: 'Intensity' })), '',
+    (v) => withBusy('volume', 'Loading labels…', volume.setLabels(v)));
+  ui.select(s.body, 'Quality', [
+    { value: '1.2', label: 'Fast' }, { value: '0.6', label: 'Normal' }, { value: '0.3', label: 'Fine' }], '0.6',
+  (v) => { volume.uniforms.uStep.value = +v; requestRender(); });
+}
+
+structureSection(context, 'Context surfaces', { hint: 'Outer hulls of the template brain and head.' });
+
+// Clipping
+{
+  const s = ui.section(panel, 'Cut-away', { hint: 'Clips every 3D layer except the MRI slices.' });
+  let pos;
+  const setRange = () => {
+    if (clip.axis === 'off') { pos.setEnabled(false); return; }
+    const i = 'xyz'.indexOf(clip.axis);
+    pos.input.min = Math.ceil(bounds.lo[i]);
+    pos.input.max = Math.floor(bounds.hi[i]);
+    pos.set(clip.pos[clip.axis]);
+    pos.setEnabled(true);
+  };
+  ui.select(s.body, 'Plane', [
+    { value: 'off', label: 'Off' }, { value: 'x', label: 'Sagittal (left | right)' },
+    { value: 'y', label: 'Coronal (back | front)' }, { value: 'z', label: 'Axial (bottom | top)' }], 'off',
+  (v) => { clip.axis = v; setRange(); applyClip(); });
+  pos = ui.slider(s.body, 'Position', {
+    min: -100, max: 100, step: 1, value: 0, format: mm,
+    onInput: (v) => { if (clip.axis !== 'off') { clip.pos[clip.axis] = v; applyClip(); } },
+  });
+  ui.checkbox(s.body, 'Keep the other side', false, (v) => { clip.flip = v; applyClip(); });
+  setRange();
+}
+
+// View
+{
+  const s = ui.section(panel, 'View', { open: true });
+  ui.buttons(s.body, Object.keys(VIEWS).map((v) => ({ label: v, onClick: () => setView(v) })));
+  ui.checkbox(s.body, 'Auto-rotate', false, (v) => { controls.autoRotate = v; requestRender(); });
+}
+
+document.getElementById('panel-toggle').addEventListener('click', () => {
+  document.body.classList.toggle('panel-hidden');
+  resize();
+});
+const about = document.getElementById('about');
+document.getElementById('about-open').addEventListener('click', () => about.showModal());
+about.addEventListener('click', (e) => { if (e.target === about) about.close(); });
+
+// ---------------------------------------------------------------------------- hover picking
+
+const tip = document.getElementById('tip');
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let pointerPx = null;
+let pickQueued = false;
+let dragging = false;
+const brainInv = new THREE.Matrix4();
+
+canvas.addEventListener('pointermove', (e) => {
+  const r = canvas.getBoundingClientRect();
+  pointerPx = [e.clientX - r.left, e.clientY - r.top];
+  pointer.set((pointerPx[0] / r.width) * 2 - 1, -(pointerPx[1] / r.height) * 2 + 1);
+  if (dragging) return;
+  if (!pickQueued) { pickQueued = true; requestAnimationFrame(pick); }
+});
+canvas.addEventListener('pointerdown', () => { dragging = true; showTip(null); });
+window.addEventListener('pointerup', () => { dragging = false; });
+canvas.addEventListener('pointerleave', () => { pointerPx = null; showTip(null); });
+
+function isSeeThrough(obj) {
+  const u = obj.userData;
+  if (u.kind === 'cortex') return cortex.style === 'xray' || cortex.opacity < 0.5;
+  if (u.kind === 'structure') return u.group.style === 'xray' || u.group.opacity < 0.5;
+  return false;
+}
+
+function pick() {
+  pickQueued = false;
+  if (!pointerPx || dragging) return;
+  raycaster.setFromCamera(pointer, camera);
+  const objs = [];
+  if (cortex.group.visible) {
+    cortex.prepareRaycast();
+    objs.push(...cortex.meshes.filter((m) => m.visible));
+  }
+  for (const g of structureGroups) objs.push(...g.pickables());
+  const sliceObjs = slices.pickables();
+  objs.push(...sliceObjs);
+  raycaster.firstHitOnly = false;
+  const hits = raycaster.intersectObjects(objs, false).filter((h) => {
+    if (h.object.userData.kind === 'slice') return true;
+    return keepPoint(brain.worldToLocal(h.point.clone()));
+  });
+  let hit = hits.find((h) => !isSeeThrough(h.object)) || hits[0] || null;
+
+  // tracts: nearest visible streamline point near the pointer ray
+  brainInv.copy(brain.matrixWorld).invert();
+  const ray = raycaster.ray.clone().applyMatrix4(brainInv);
+  const pxMm = (t) => (2 * t * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / canvas.clientHeight;
+  const tp = tracts.pick(ray, (t) => 5 * pxMm(t), (x, y, z) => keepPoint(new THREE.Vector3(x, y, z)));
+  let info = null;
+  let tractHover = null, structHover = null, cortexHl = null;
+  if (tp && (!hit || tp.t < hit.distance + 0.5 || isSeeThrough(hit.object))) {
+    tractHover = tp.item;
+    info = { ...tracts.describe(tp.item), mni: tp.point };
+  } else if (hit) {
+    const u = hit.object.userData;
+    const local = brain.worldToLocal(hit.point.clone()).toArray();
+    if (u.kind === 'cortex') {
+      info = cortex.describe(hit);
+      cortexHl = info.highlight || null;
+    } else if (u.kind === 'structure') {
+      info = { ...u.group.describe(hit), mni: local };
+      structHover = info;
+    } else if (u.kind === 'slice') {
+      info = { ...slices.describe(local), mni: local };
+    }
+  }
+  tracts.setHover(tractHover);
+  for (const g of structureGroups) g.setHover(structHover && structHover.group === g ? structHover.item : null);
+  cortex.setHighlight(cortexHl);
+  showTip(info);
+  requestRender();
+}
+
+function showTip(info) {
+  if (!info || !pointerPx) { tip.hidden = true; return; }
+  tip.replaceChildren();
+  const t = ui.el('div', 'tip-title');
+  if (info.swatch) {
+    const sw = ui.el('span', 'swatch');
+    sw.style.background = info.swatch;
+    t.append(sw);
+  }
+  t.append(info.title);
+  tip.append(t);
+  for (const l of info.lines || []) tip.append(ui.el('div', 'tip-line', l));
+  if (info.mni) tip.append(ui.el('div', 'tip-coord', `MNI ${info.mni.map((v) => Math.round(v)).join(', ')}`));
+  tip.hidden = false;
+  const r = canvas.getBoundingClientRect();
+  const x = Math.min(pointerPx[0] + r.left + 16, window.innerWidth - tip.offsetWidth - 8);
+  const y = Math.min(pointerPx[1] + r.top + 16, window.innerHeight - tip.offsetHeight - 8);
+  tip.style.transform = `translate(${x}px, ${y}px)`;
+}
+
+// ---------------------------------------------------------------------------- loop
+
+renderer.setAnimationLoop(() => {
+  const moved = controls.update();
+  if (moved || needsRender) {
+    needsRender = false;
+    renderer.render(scene, camera);
+  }
+});
+
+window.brainview = {
+  THREE, scene, camera, controls, renderer, brain, cortex, aseg, massp, thalamic, context, tracts, slices, volume,
+  setView, requestRender, clip, applyClip,
+};

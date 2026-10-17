@@ -1,0 +1,13 @@
+{
+  "name": "brainview",
+  "version": "1.0.0",
+  "private": true,
+  "description": "three.js viewer for open brain-imaging data (cortex atlases, nuclei, tracts, MRI volumes)",
+  "dependencies": {
+    "three": "^0.186.1",
+    "three-mesh-bvh": "^0.9.16"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.14.0"
+  }
+}

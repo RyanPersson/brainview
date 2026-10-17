@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brainview</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/",
+        "three-mesh-bvh": "./vendor/three-mesh-bvh/index.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <canvas id="view"></canvas>
+
+  <aside id="panel">
+    <header>
+      <h1>Brainview</h1>
+      <button id="about-open" type="button" title="Data sources">Data</button>
+    </header>
+    <div id="panel-body"></div>
+  </aside>
+  <button id="panel-toggle" type="button" title="Show / hide panel">☰</button>
+
+  <div id="status" hidden></div>
+  <div id="loading">Loading brain…</div>
+  <div id="tip" hidden></div>
+
+  <dialog id="about">
+    <h2>Data sources</h2>
+    <p>Everything is placed in one common space, MNI152NLin2009cAsym (millimetres, RAS). The fsaverage surfaces are moved from MNI305 with FreeSurfer's published affine.</p>
+    <ul>
+      <li><b>Cortical surfaces</b>: FreeSurfer <i>fsaverage</i>, 163,842 vertices per hemisphere (pial, white, sphere, sulc, curv). Retrieved via <a href="https://www.templateflow.org" target="_blank" rel="noopener">TemplateFlow</a>. The inflated surfaces are computed here by area-preserving Laplacian smoothing of the white surface.</li>
+      <li><b>Cortical atlases</b>: Desikan–Killiany (Desikan 2006); Destrieux (2010); Yeo 7/17 networks (2011); Schaefer 100/400/1000 (2018); Brainnetome (Fan 2016); Lausanne 2018 (Cammoun 2012). All from TemplateFlow. Glasser HCP-MMP1 (Glasser 2016), as projected onto fsaverage by Kathryn Mills (figshare, CC BY 4.0).</li>
+      <li><b>Volumes</b>: ICBM 2009c nonlinear asymmetric template (Fonov 2009/2011): T1, T2, tissue probabilities, and an aseg-style segmentation. Also the MASSP 2.0 subcortical atlas (Bazin 2025) and the MIAL thalamic nuclei (Najdenovska 2018). All from TemplateFlow.</li>
+      <li><b>Tracts</b>: the HCP-842 population-averaged tractography atlas (Yeh 2018), as curated into 80 bundles by Eleftherios Garyfallidis (CC BY 4.0). Streamlines are subsampled and simplified for the browser.</li>
+    </ul>
+    <p>Data were provided [in part] by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.</p>
+    <p>The Glasser, tract, thalamic-nuclei and Brainnetome layers are derived from HCP data and are shared under the <a href="https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms" target="_blank" rel="noopener">WU-Minn HCP Open Access Data Use Terms</a>. Each dataset keeps its own license: <a href="licenses/FreeSurfer.txt" target="_blank">FreeSurfer</a>, <a href="licenses/MNI-ICBM152.txt" target="_blank">MNI ICBM 152</a>, <a href="licenses/Brainnetome.txt" target="_blank">Brainnetome</a> (non-commercial), <a href="licenses/HCP-Open-Access-Data-Use-Terms.txt" target="_blank">HCP</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> (Lausanne, MASSP 2.0, MIAL, HCP-MMP1 on fsaverage, 80 bundles) and MIT (Schaefer). Every file here is converted and simplified from the original.</p>
+    <p>Rendering is three.js; hover picking uses three-mesh-bvh. For learning and exploring, not for clinical use.</p>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+</body>
+</html>
