@@ -46,10 +46,13 @@ def log(*a):
 
 def save(name, arr):
     arr = np.ascontiguousarray(arr)
+    data = arr.tobytes()
     path = os.path.join(OUT, name + ".bin.gz")
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with gzip.open(path, "wb", compresslevel=9) as f:
-        f.write(arr.tobytes())
+    # leave an unchanged file alone, and write no timestamp, so a rebuild doesn't churn the committed data
+    if not (os.path.exists(path) and gzip.decompress(open(path, "rb").read()) == data):
+        with open(path, "wb") as fh, gzip.GzipFile("", "wb", 9, fh, mtime=0) as f:
+            f.write(data)
     return {"url": "data/" + name + ".bin.gz", "dtype": arr.dtype.name, "length": int(arr.size)}
 
 
@@ -419,9 +422,11 @@ def read_fs_lut():
 def mask_to_mesh(mask, affine, sigma=1.0, upsample=1, target_faces=None, smooth=5):
     from skimage import measure
     idx = np.argwhere(mask)
-    lo = np.maximum(idx.min(0) - 4, 0)
-    hi = np.minimum(idx.max(0) + 5, mask.shape)
-    sub = mask[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]].astype(np.float32)
+    lo = idx.min(0) - 4
+    hi = idx.max(0) + 5
+    # a 4-voxel empty margin all round, also where the mask runs into the edge of the volume, so the
+    # surface is closed there
+    sub = np.pad(mask, 4)[lo[0] + 4:hi[0] + 4, lo[1] + 4:hi[1] + 4, lo[2] + 4:hi[2] + 4].astype(np.float32)
     n_in = np.array(sub.shape)
     if upsample != 1:
         sub = ndimage.zoom(sub, upsample, order=1)
@@ -570,12 +575,26 @@ def build_meshes(man):
     structs.append({"id": "hull_brain", "name": "Brain hull", "category": "Context", "mask": m, "visible": True,
                     "affine": img.affine, "color": "#9fb7d9",
                     "opts": {"sigma": 2.0, "upsample": 1, "target_faces": 60000, "smooth": 6}})
-    img = nib.load(TF_MNI + "res-01_desc-head_mask.nii.gz")
-    m = ndimage.binary_fill_holes(np.asarray(img.dataobj) > 0)  # interior cavities would add hidden surfaces
+    # The head comes from thresholding the full-head T1. TemplateFlow's desc-head_mask can't be used: it
+    # sits on a 545x653x545 grid and is solid below z = +5 mm, which made a huge flat sheet under a dome.
+    img = nib.load(TF_MNI + "res-01_T1w.nii.gz")
+    m = ndimage.binary_opening(np.asarray(img.dataobj) > 1000)  # the background tops out near 600
+    lab, _ = ndimage.label(m)
+    sizes = np.bincount(lab.ravel())
+    sizes[0] = 0
+    m = lab == sizes.argmax()
+    # The template's box cuts the head at the brow (front) and below the cerebellum (bottom). Count those
+    # cut faces as tissue, so the dark skull between the scalp and the brain is an enclosed cavity and gets
+    # filled; interior cavities would only add hidden surfaces.
+    p = np.pad(m, 1)
+    p[:, -1, :] = True
+    p[:, :, 0] = True
+    m = ndimage.binary_fill_holes(p)[1:-1, 1:-1, 1:-1]
     structs.append({"id": "hull_head", "name": "Head (skin)", "category": "Context", "mask": m, "visible": False,
                     "affine": img.affine, "color": "#e3b9a0",
-                    "opts": {"sigma": 1.2, "upsample": 0.5, "target_faces": 120000, "smooth": 4}})
-    build_mesh_group("context", "Context surfaces", "Outer hulls from the MNI152 2009c brain and head masks",
+                    "opts": {"sigma": 1.2, "upsample": 1, "target_faces": 120000, "smooth": 4}})
+    build_mesh_group("context", "Context surfaces",
+                     "Outer hulls of the MNI152 2009c brain (brain mask) and head (skin surface of the T1)",
                      structs, man)
 
 

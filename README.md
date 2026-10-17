@@ -16,7 +16,7 @@ one common space, MNI152NLin2009cAsym (millimetres, RAS), so the layers can be s
 | White-matter tracts | HCP-842 tractography atlas, 80 bundles | Tube-shaded streamlines coloured by direction or by bundle. Density, width and category filters. |
 | MRI slices | T1, T2 and GM/WM/CSF probability maps | Axial, coronal and sagittal planes, with an optional label overlay (aseg, MASSP, thalamic, tissue class). |
 | Volume rendering | The same volumes, ray-marched on the GPU | Iso-surface, translucent, or maximum-intensity projection, optionally coloured by labels. |
-| Context | Brain hull and head (skin) from the template masks | Glass or solid. |
+| Context | Brain hull from the template's brain mask; head (skin) from the full-head T1 | Glass or solid. |
 
 The cut-away plane clips every 3D layer. Hovering anything names it: the region in the current
 atlas, the structure, the tract, or the label under a slice. The MNI coordinate is shown too.

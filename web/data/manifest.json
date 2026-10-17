@@ -9442,20 +9442,20 @@
   {
    "id": "context",
    "label": "Context surfaces",
-   "description": "Outer hulls from the MNI152 2009c brain and head masks",
+   "description": "Outer hulls of the MNI152 2009c brain (brain mask) and head (skin surface of the T1)",
    "positions": {
     "url": "data/meshes/context_pos.bin.gz",
     "dtype": "uint16",
-    "length": 270603,
+    "length": 270009,
     "min": [
-     -272.68772,
-     -344.18115,
-     -72.32881
+     -95.74514,
+     -126.63551,
+     -78.52408
     ],
     "scale": [
-     0.00832537711181748,
-     0.009954228825787944,
-     0.0027595983234255388
+     0.00291530586012481,
+     0.003405250659872748,
+     0.0028387460991705165
     ]
    },
    "indices": {
@@ -9485,10 +9485,10 @@
      "category": "Context",
      "visible": false,
      "vStart": 30002,
-     "vCount": 60199,
+     "vCount": 60001,
      "iStart": 180000,
      "iCount": 359994,
-     "voxels": 92902765
+     "voxels": 4491220
     }
    ]
   }
