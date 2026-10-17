@@ -7,6 +7,7 @@ import { cssGradient } from './colormaps.js';
 import { Cortex } from './cortex.js';
 import { MeshGroup } from './meshes.js';
 import { Tracts } from './tracts.js';
+import { SignalFlow, SCENARIOS } from './flow.js';
 import { TmsTargets } from './tms.js';
 import { VolumeStore, Slices, VolumeRender } from './volume.js';
 import * as ui from './ui.js';
@@ -106,21 +107,25 @@ const massp = new MeshGroup(groups.massp, brain);
 const thalamic = new MeshGroup(groups.thalamic, brain);
 const context = new MeshGroup(groups.context, brain, { style: 'xray' });
 const tracts = new Tracts(man.tracts, brain);
+const flow = new SignalFlow(man.flow, tracts, brain);
 const store = new VolumeStore(man.volumes);
 const slices = new Slices(store, brain);
 const volume = new VolumeRender(store, brain);
 const tms = new TmsTargets(man.tms, brain);
 const structureGroups = [aseg, massp, thalamic, context];
 
-// Opening view: the white-matter tracts on their own; every other layer loads when first switched on.
-setView('Left', 430);
+// Opening view: the gold white-matter tracts with signals flowing, cut down the middle and seen from the right
+// (the left hemisphere's inner face, as in Greg Dunn's Self Reflected); every other layer loads when first switched on.
+setView('Right', 430);
+tracts.mode = 2;
 tracts.setVisible(true);
-await withBusy('tracts', 'Loading tracts…', tracts.load());
+flow.setVisible(true);
+await withBusy('tracts', 'Loading tracts…', flow.load());
 document.getElementById('loading').remove();
 
 // ---------------------------------------------------------------------------- clipping
 
-const clip = { axis: 'off', pos: { x: 0, y: -18, z: 10 }, flip: false };
+const clip = { axis: 'x', pos: { x: -4, y: -18, z: 10 }, flip: false };
 const localPlane = new THREE.Plane();
 function applyClip() {
   clipPlanes.length = 0;
@@ -136,6 +141,7 @@ function applyClip() {
   requestRender();
 }
 const keepPoint = (p) => clip.axis === 'off' || localPlane.distanceToPoint(p) >= -1e-3;
+applyClip();
 
 // ---------------------------------------------------------------------------- panel
 
@@ -283,8 +289,10 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
     onToggle: (v) => { tracts.setVisible(v); if (v) withBusy('tracts', 'Loading tracts…', tracts.load()); requestRender(); },
   });
   const key = ui.note(s.body, 'Red: left–right · green: front–back · blue: up–down', 'desc');
+  key.hidden = tracts.mode !== 0;
   ui.select(s.body, 'Colour by', [
-    { value: '0', label: 'Fibre direction' }, { value: '1', label: 'Bundle' }], '0',
+    { value: '0', label: 'Fibre direction' }, { value: '1', label: 'Bundle' }, { value: '2', label: 'Gold' }],
+  String(tracts.mode),
   (v) => { tracts.mode = +v; key.hidden = v !== '0'; tracts.apply(); requestRender(); }).row.after(key);
   ui.slider(s.body, 'Width', {
     min: 0.1, max: 2, step: 0.05, value: tracts.width, format: (v) => `${v.toFixed(2)} mm`,
@@ -321,6 +329,44 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
     rows.filter((r) => r.category === c).map((r) => ({
       label: r.name, swatch: r.color, checked: true, onChange: (v) => { r.on = v; apply(); },
     }))]));
+}
+
+// Signal flow
+{
+  const s = ui.section(panel, 'Signal flow', {
+    checked: true, open: true, hint: man.flow.description,
+    onToggle: (v) => { flow.setVisible(v); if (v) withBusy('flow', 'Loading tracts…', flow.load()); requestRender(); },
+  });
+  const desc = ui.note(s.body, '', 'desc');
+  const describe = () => { desc.textContent = flow.scenario.text; };
+  ui.select(s.body, 'Scenario', SCENARIOS.map((x) => ({ value: x.id, label: x.label })), flow.scenario.id, (v) => {
+    flow.setScenario(v);
+    describe();
+    requestRender();
+  }).row.after(desc);
+  describe();
+  const btns = ui.buttons(s.body, [
+    {
+      label: 'Pause',
+      onClick: () => { flow.playing = !flow.playing; btns.firstChild.textContent = flow.playing ? 'Pause' : 'Play'; },
+    },
+    { label: 'Restart', onClick: () => { flow.reset(); requestRender(); } },
+  ]);
+  ui.slider(s.body, 'Speed', {
+    min: 2, max: 40, step: 1, value: flow.rate, format: (v) => `${Math.round(1000 / v)}× slower`,
+    onInput: (v) => { flow.rate = v; },
+  });
+  ui.slider(s.body, 'Brightness', {
+    min: 0.2, max: 2.5, step: 0.05, value: flow.gain, format: (v) => `${Math.round(v * 100)}%`,
+    onInput: (v) => { flow.gain = v; requestRender(); },
+  });
+  ui.slider(s.body, 'Glow width', {
+    min: 0.5, max: 6, step: 0.1, value: flow.glowWidth, format: (v) => `${v.toFixed(1)} mm`,
+    onInput: (v) => { flow.glowWidth = v; requestRender(); },
+  });
+  ui.note(s.body, 'Pulses run on the bundles and density chosen under White-matter tracts. Each pulse leads with '
+    + 'its bright head. Hover a tract to see which way it carries signals. The view opens cut down the middle; '
+    + 'switch off Cut-away to see the whole brain.', 'desc');
 }
 
 // Volume slices
@@ -428,13 +474,13 @@ structureSection(context, 'Context surfaces', { hint: 'Outer hulls of the templa
   };
   ui.select(s.body, 'Plane', [
     { value: 'off', label: 'Off' }, { value: 'x', label: 'Sagittal (left | right)' },
-    { value: 'y', label: 'Coronal (back | front)' }, { value: 'z', label: 'Axial (bottom | top)' }], 'off',
+    { value: 'y', label: 'Coronal (back | front)' }, { value: 'z', label: 'Axial (bottom | top)' }], clip.axis,
   (v) => { clip.axis = v; setRange(); applyClip(); });
   pos = ui.slider(s.body, 'Position', {
     min: -100, max: 100, step: 1, value: 0, format: mm,
     onInput: (v) => { if (clip.axis !== 'off') { clip.pos[clip.axis] = v; applyClip(); } },
   });
-  ui.checkbox(s.body, 'Keep the other side', false, (v) => { clip.flip = v; applyClip(); });
+  ui.checkbox(s.body, 'Keep the other side', clip.flip, (v) => { clip.flip = v; applyClip(); });
   setRange();
 }
 
@@ -512,6 +558,7 @@ function pick() {
   if (tp && (!hit || tp.t < hit.distance + 0.5 || isSeeThrough(hit.object))) {
     tractHover = tp.item;
     info = { ...tracts.describe(tp.item), mni: tp.point };
+    if (man.flow.notes[tp.item.id]) info.lines.push(man.flow.notes[tp.item.id]);
   } else if (hit) {
     const u = hit.object.userData;
     const local = brain.worldToLocal(hit.point.clone()).toArray();
@@ -601,8 +648,16 @@ function updateLabels() {
 
 // ---------------------------------------------------------------------------- loop
 
+let lastFrame = performance.now();
 renderer.setAnimationLoop(() => {
+  const now = performance.now();
+  const dt = (now - lastFrame) / 1000;
+  lastFrame = now;
   const moved = controls.update();
+  if (flow.group.visible) {
+    if (flow.playing) { flow.step(dt); needsRender = true; }
+    flow.sync();
+  }
   if (moved || needsRender) {
     needsRender = false;
     renderer.render(scene, camera);
@@ -612,5 +667,6 @@ renderer.setAnimationLoop(() => {
 
 window.brainview = {
   THREE, scene, camera, controls, renderer, brain, cortex, aseg, massp, thalamic, context, tracts, slices, volume, tms,
+  flow,
   setView, requestRender, clip, applyClip,
 };

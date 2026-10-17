@@ -57,6 +57,13 @@ Where the files came from:
 The FreeSurfer license notes that this data was made for research and is not meant for clinical
 use. Brainview is the same: it's for learning and exploring, not for diagnosis.
 
+## Signal flow
+
+The signal-flow links (`web/data/flow/`) are derived from the 80-bundle atlas, the Desikan–Killiany
+atlas and the aseg segmentation, and keep their terms. The direction of each bundle is textbook
+neuroanatomy, not data. The deep-sleep scenario follows Massimini et al. 2004,
+[doi:10.1523/JNEUROSCI.1318-04.2004](https://doi.org/10.1523/JNEUROSCI.1318-04.2004).
+
 ## TMS targets
 
 The TMS layer places published coordinates and procedures on the template. They are facts from these

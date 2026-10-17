@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert the downloaded open datasets (raw/) into compact binaries for the web viewer (web/data/).
 
-Usage:  .venv/bin/python -I build/build.py [cortex] [atlases] [meshes] [tracts] [volumes] [tms] [check]
+Usage:  .venv/bin/python -I build/build.py [cortex] [atlases] [meshes] [tracts] [flow] [volumes] [tms] [check]
         (no args = everything; atlases is the parcellation part of cortex, tms needs the meshes)
 
 Every output array is written as  web/data/<name>.bin.gz  (raw little-endian bytes, gzipped;
@@ -1014,6 +1014,202 @@ def build_tms(man):
                   "groups": list(TMS_GROUPS), "targets": targets}
 
 
+# ----------------------------------------------------------------------------- signal flow
+
+# Diffusion tractography can't tell which way a fibre conducts. The direction of each bundle comes from
+# classical anatomy instead: per bundle, which end sends, what sits at each end, and a note for the viewer.
+#   way: "two" (reciprocal), "one" (source end -> other end), "mid" (from a point midway out to both ends)
+#   src: how to tell the source end apart: high/low (z), front/back (y), lateral/medial (|x|),
+#        near:<mask> / far:<mask> (distance to a subcortical structure)
+#   nodes: (source end, other end); "dk" = the Desikan-Killiany area at that end ("dk@lateral": at the
+#        streamline's most lateral point instead), "thal" = the thalamic relay for the cortical area at the
+#        other end, "<key>|side" = a deep node per hemisphere
+FLOW_NODES = {
+    "eye": "Eye (retina)", "lgn": "Thalamus: visual relay (LGN)", "mgn": "Thalamus: hearing relay (MGN)",
+    "vpl": "Thalamus: body-sense relay (VPL/VPM)", "vl": "Thalamus: motor relay (VA/VL)",
+    "md": "Thalamus: mediodorsal nucleus", "ant": "Thalamus: anterior nucleus", "pul": "Thalamus: pulvinar",
+    "striatum": "Striatum (caudate & putamen)", "pons": "Pontine nuclei", "cord_motor": "Spinal cord (to the muscles)",
+    "cord_sense": "Spinal cord (pain & temperature)", "dcn": "Dorsal column nuclei (touch & limb position)",
+    "cbx": "Cerebellar cortex", "dcbn": "Deep cerebellar nuclei", "olive": "Inferior olive",
+    "red": "Red nucleus", "ic": "Inferior colliculus", "cochlear": "Cochlear nuclei", "ear": "Inner ear",
+    "vestib": "Vestibular nuclei", "eyemotor": "Eye-movement nuclei (midbrain)", "eyemuscles": "Eye muscles",
+    "face_sense": "Face & mouth (touch)", "trigeminal": "Trigeminal nuclei", "facial_nuc": "Facial nucleus",
+    "face_muscles": "Face muscles", "reticular": "Reticular formation", "hypothalamus": "Hypothalamus",
+    "medulla_auto": "Medulla (autonomic centres)", "hippocampus": "Hippocampus",
+    "mammillary": "Mammillary bodies", "pretectum": "Pretectum (midbrain)",
+}
+ASSOC_NOTE = "Two-way: association fibres carry signals in both directions between these areas."
+COMM_NOTE = "Two-way: links matching areas of the two hemispheres, in both directions."
+FLOW = {
+    **{a: ("two", None, ("dk", "dk"), ASSOC_NOTE)
+       for a in ["AF", "AST", "C", "EMC", "IFOF", "ILF", "MdLF", "SLF", "UF", "VOF"]},
+    **{a: ("two", None, ("dk", "dk"), COMM_NOTE) for a in ["CC", "CCMid", "CC_ForcepsMajor", "CC_ForcepsMinor", "AC"]},
+    "PC": ("two", None, ("pretectum|side", "pretectum|side"), "Two-way: joins the pretectal areas (pupil reflex)."),
+    "OR": ("one", "near:thalamus", ("lgn|side", "dk"), "One-way: from the thalamus (LGN) up to the visual cortex."),
+    # the atlas's acoustic radiation runs on past Heschl's gyrus into parietal white matter; its most lateral
+    # point is where it passes the auditory cortex
+    "AR": ("one", "near:thalamus", ("mgn|side", "dk@lateral"),
+           "One-way: from the thalamus (MGN) up to the auditory cortex."),
+    "CT": ("two", "near:thalamus", ("thal", "dk"),
+           "Two-way: thalamus to cortex and back; each cortical area has its own thalamic relay."),
+    "CS": ("one", "far:striatum", ("dk", "striatum|side"), "One-way: from the cortex down to the striatum."),
+    "CST": ("one", "high", ("dk", "cord_motor"), "One-way: from motor cortex down to the spinal cord (movement)."),
+    **{a: ("one", "high", ("dk", "pons"), "One-way: from the cortex down to the pons, then on to the cerebellum.")
+       for a in ["FPT", "OPT", "PPT", "TPT"]},
+    "F": ("one", "back", ("hippocampus|side", "mammillary"), "One-way: from the hippocampus to the mammillary bodies."),
+    "CB": ("two", None, ("cbx|side", "cbx|side"), "Two-way: fibres within the cerebellum."),
+    "V": ("two", None, ("cbx|side", "cbx|side"), "Two-way: across the vermis, between the cerebellar hemispheres."),
+    "ICP": ("one", "low", ("olive|side", "cbx|side"),
+            "One-way: from the medulla (inferior olive) into the cerebellum."),
+    "MCP": ("mid", None, ("cbx|side", "cbx|side"), "One-way: from the pons outward into both cerebellar hemispheres."),
+    "SCP": ("one", "back", ("dcbn|side", "red|side"),
+            "One-way: the cerebellum's output, to the red nucleus and motor thalamus."),
+    "CTT": ("one", "high", ("red|side", "olive|side"), "One-way: from the red nucleus down to the inferior olive."),
+    "DLF": ("two", "high", ("hypothalamus", "medulla_auto"), "Two-way: hypothalamus and brainstem autonomic centres."),
+    "LL": ("one", "low", ("cochlear|side", "ic|side"),
+           "One-way: hearing, up from the cochlear nuclei to the midbrain."),
+    "ML": ("one", "low", ("dcn|side", "vpl|side"), "One-way: touch and limb position, up to the thalamus."),
+    "MLF": ("two", "low", ("vestib|side", "eyemotor|side"), "Two-way: links balance and eye-movement nuclei."),
+    "RST": ("one", "high", ("reticular|side", "cord_motor"), "One-way: from the brainstem down to the spinal cord."),
+    "STT": ("one", "low", ("cord_sense|side", "vpl|side"), "One-way: pain and temperature, up to the thalamus."),
+    "CNII": ("one", "front", ("eye|side", "lgn|side"), "One-way: from the eye back to the thalamus (LGN)."),
+    "CNIII": ("one", "back", ("eyemotor|side", "eyemuscles|side"),
+              "One-way: from the midbrain out to the eye muscles."),
+    "CNIV": ("one", "back", ("eyemotor|side", "eyemuscles|side"), "One-way: from the midbrain out to an eye muscle."),
+    "CNV": ("one", "lateral", ("face_sense|side", "trigeminal|side"),
+            "Mostly one-way: touch from the face and mouth into the brainstem."),
+    "CNVII": ("one", "medial", ("facial_nuc|side", "face_muscles|side"),
+              "One-way: from the brainstem out to the face muscles."),
+    "CNVIII": ("one", "lateral", ("ear|side", "cochlear|side"), "One-way: from the inner ear into the brainstem."),
+}
+# Hops with no drawn bundle (short or unmapped pathways): (from, to, delay ms, what it is)
+FLOW_RELAYS = [
+    ("ic.{s}", "mgn.{s}", 2, "brachium of the inferior colliculus"),
+    ("cochlear.{s}", "ic.{o}", 3, "crossed hearing pathway (superior olive)"),
+    ("red.{s}", "vl.{s}", 2, "cerebellar output continuing to the motor thalamus"),
+    ("cbx.{s}", "dcbn.{s}", 3, "Purkinje cells to the deep cerebellar nuclei"),
+    ("trigeminal.{s}", "vpl.{o}", 3, "trigeminothalamic tract"),
+    ("{s}.entorhinal", "hippocampus.{s}", 3, "perforant path"),
+    ("mammillary", "ant.{s}", 3, "mammillothalamic tract"),
+    ("striatum.{s}", "vl.{s}", 8, "basal ganglia loop through the pallidum"),
+    ("vestib.{s}", "cbx.{s}", 3, "vestibulocerebellar fibres"),
+]
+THAL_RELAY = {
+    "vl": ["precentral", "caudalmiddlefrontal", "paracentral"], "vpl": ["postcentral"],
+    "mgn": ["transversetemporal"],
+    "ant": ["rostralanteriorcingulate", "caudalanteriorcingulate", "posteriorcingulate", "isthmuscingulate"],
+    "md": ["superiorfrontal", "rostralmiddlefrontal", "parsopercularis", "parstriangularis", "parsorbitalis",
+           "lateralorbitofrontal", "medialorbitofrontal", "frontalpole"],
+}  # anything else: pulvinar
+
+
+def build_flow(man):
+    """Per streamline: the node at each end and the direction(s) signals run, from the FLOW rules."""
+    from scipy.spatial import cKDTree
+    T = man["tracts"]
+    P = load_saved(T["positions"]).reshape(-1, 3) * T["posScale"]
+    counts = load_saved(T["counts"]).astype(np.int64)
+    start = np.concatenate([[0], np.cumsum(counts)])
+    ends = np.stack([P[start[:-1]], P[start[1:] - 1]], 1)  # streamline, end, xyz
+
+    # cortex: nearest labelled white-surface vertex
+    cv, cl = [], []
+    dk = {}
+    for h in "LR":
+        w = apply_affine(MNI305_TO_152, nib.load(f"{TF_FS}hemi-{h}_den-164k_white.surf.gii").agg_data()[0])
+        lab, names, _ = read_atlas(h, "dk", "atlas-Desikan2006_seg-aparc_desc-curated")
+        keep = lab != 0
+        cv.append(w[keep])
+        cl += [f"{h}.{names[i]}" for i in lab[keep]]
+        dk[h] = names
+    ctree, cl = cKDTree(np.concatenate(cv)), np.array(cl)
+    img = nib.load(TF_MNI + "res-01_seg-aseg_dseg.nii.gz")
+    aseg = np.asarray(img.dataobj)
+    masks = {"thalamus": [10, 49], "striatum": [11, 50, 12, 51, 13, 52]}
+    mtree = {k: cKDTree(apply_affine(img.affine, np.argwhere(np.isin(aseg, v)).astype(float)))
+             for k, v in masks.items()}
+
+    nodes, index = [], {}
+
+    def node(nid):
+        if nid not in index:
+            key, _, side = nid.partition(".")
+            if key in ("L", "R"):  # cortical area
+                name = ("Left " if key == "L" else "Right ") + pretty_dk(side).lower()
+                nodes.append({"id": nid, "name": name, "kind": "cortex", "hemi": key, "dk": side})
+            else:
+                name = FLOW_NODES[key]
+                if side:
+                    name = ("Left " if side == "L" else "Right ") + name[0].lower() + name[1:]
+                nodes.append({"id": nid, "name": name, "kind": "deep", "hemi": side})
+            index[nid] = len(nodes) - 1
+        return index[nid]
+
+    side = lambda p: "L" if p[0] < 0 else "R"
+    relay_of = {a: k for k, v in THAL_RELAY.items() for a in v}
+    links = np.zeros((len(counts), 4), np.uint16)
+    notes = {}
+    for b in T["bundles"]:
+        way, src, (na, nb), note = FLOW[b["abbr"]]
+        notes[b["id"]] = note
+        for s in range(b["first"], b["first"] + b["count"]):
+            e = ends[s]
+            if src is None:
+                first = 0
+            else:
+                kind, _, arg = src.partition(":")
+                score = {"high": e[:, 2], "low": -e[:, 2], "front": e[:, 1], "back": -e[:, 1],
+                         "lateral": np.abs(e[:, 0]), "medial": -np.abs(e[:, 0])}.get(kind)
+                if kind in ("near", "far"):
+                    d = mtree[arg].query(e)[0]
+                    score = -d if kind == "near" else d
+                first = int(np.argmax(score))  # the source end
+            pts = (e[first], e[1 - first])
+            cort = [cl[ctree.query(p)[1]] for p in pts]
+            ids = []
+            for k, (spec, p) in enumerate(zip((na, nb), pts)):
+                if spec == "dk":
+                    ids.append(cort[k])
+                elif spec == "dk@lateral":
+                    q = P[start[s]:start[s + 1]]
+                    ids.append(cl[ctree.query(q[np.argmax(np.abs(q[:, 0]))])[1]])
+                elif spec == "thal":
+                    ids.append(f"{relay_of.get(cort[1 - k].split('.')[1], 'pul')}.{side(p)}")
+                else:
+                    key, _, per = spec.partition("|")
+                    ids.append(f"{key}.{side(p)}" if per else key)
+            a, bb = (ids if first == 0 else ids[::-1])
+            mode, mid, m = (3 if way == "two" else 1 if first == 0 else 2), 0, 65535
+            if way == "mid":
+                # MCP: signals start where the streamline is nearest the pons (the midline) and run outward;
+                # a streamline that ends at the midline runs one way, from that end
+                q = P[start[s]:start[s + 1]]
+                i = int(np.argmin(np.abs(q[:, 0])))
+                f = np.linalg.norm(np.diff(q[:i + 1], axis=0), axis=1).sum() / \
+                    max(1e-6, np.linalg.norm(np.diff(q, axis=0), axis=1).sum())
+                if f < 0.08:
+                    a, mode = "pons", 1
+                elif f > 0.92:
+                    bb, mode = "pons", 2
+                else:
+                    m, mode, mid = node("pons"), 4, int(round(f * 255))
+            links[s] = [node(a), node(bb), m, mode | (mid << 8)]
+    relays = []
+    for fr, to, delay, what in FLOW_RELAYS:
+        for s_, o in (("L", "R"), ("R", "L")):
+            f_, t_ = fr.format(s=s_, o=o), to.format(s=s_, o=o)
+            if f_ in index or f_.startswith(("L.", "R.")):
+                r = [node(f_), node(t_), delay, what]
+                if r not in relays:
+                    relays.append(r)
+    log(f"flow: {len(nodes)} nodes, {len(relays)} relays, "
+        f"{np.bincount(links[:, 3] & 15, minlength=5).tolist()} streamlines by mode (-, A>B, B>A, both, mid)")
+    man["flow"] = {
+        "description": "An illustrative model, not a recording: anatomy from the tract atlas, the direction of "
+                       "each pathway from established anatomy, and timing modelled.",
+        "nodes": nodes, "links": save("flow/links", links), "relays": relays, "notes": notes}
+
+
 def check_alignment():
     """Mean GM probability sampled at fsaverage mid-thickness vertices, with/without MNI305->152."""
     img = nib.load(TF_MNI + "res-01_label-GM_probseg.nii.gz")
@@ -1038,7 +1234,7 @@ def check_alignment():
 
 
 def main():
-    steps = sys.argv[1:] or ["cortex", "meshes", "tracts", "volumes", "tms"]
+    steps = sys.argv[1:] or ["cortex", "meshes", "tracts", "flow", "volumes", "tms"]
     os.makedirs(OUT, exist_ok=True)
     if "check" in steps:
         check_alignment()
@@ -1047,7 +1243,7 @@ def main():
     man["frame"] = "MNI152NLin2009cAsym (RAS, mm)"
     for s in steps:
         {"cortex": build_cortex, "atlases": build_atlases, "meshes": build_meshes, "tracts": build_tracts,
-         "volumes": build_volumes, "tms": build_tms}[s](man)
+         "flow": build_flow, "volumes": build_volumes, "tms": build_tms}[s](man)
         with open(MANIFEST_PATH, "w") as fh:
             json.dump(man, fh, indent=1)
     log("done")

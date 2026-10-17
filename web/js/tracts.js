@@ -15,6 +15,7 @@ const vertexShader = /* glsl */`
   varying float vSide;
   varying vec3 vSideDir;
   varying vec3 vView;
+  varying vec3 vTan;
   void main() {
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vec3 t = normalize(mat3(modelViewMatrix) * dir);
@@ -27,6 +28,7 @@ const vertexShader = /* glsl */`
     vSide = side;
     vSideDir = s;
     vView = v;
+    vTan = t;
     vColor = uMode == 0 ? abs(dir) : uColor;
     gl_Position = projectionMatrix * mvPosition;
     #include <clipping_planes_vertex>
@@ -35,12 +37,14 @@ const vertexShader = /* glsl */`
 const fragmentShader = /* glsl */`
   #include <common>
   #include <clipping_planes_pars_fragment>
+  uniform int uMode;
   uniform float uOpacity;
   uniform float uHighlight;
   varying vec3 vColor;
   varying float vSide;
   varying vec3 vSideDir;
   varying vec3 vView;
+  varying vec3 vTan;
   void main() {
     #include <clipping_planes_fragment>
     float u = clamp(vSide, -1.0, 1.0);
@@ -49,6 +53,18 @@ const fragmentShader = /* glsl */`
     float diff = max(dot(n, L), 0.0);
     float spec = pow(max(dot(n, normalize(L + vView)), 0.0), 36.0);
     vec3 c = vColor * (0.28 + 0.8 * diff) + 0.22 * spec;
+    if (uMode == 2) {
+      // gold leaf: a dark metal whose highlight runs along each fibre (hair-style anisotropic sheen), with a
+      // faint hue drift by viewing angle like the etched gold of a reflective microetching
+      vec3 T = normalize(vTan);
+      float th = dot(T, normalize(L + vView));
+      float sheen = pow(max(0.0, 1.0 - th * th), 30.0);
+      float tl = dot(T, L);
+      float lit = sqrt(max(0.0, 1.0 - tl * tl)) * (0.3 + 0.7 * diff);
+      vec3 film = 0.5 + 0.5 * cos(6.2832 * (0.5 * dot(T, vView) + vec3(0.0, 0.33, 0.67)));
+      vec3 gold = vec3(0.72, 0.5, 0.22);
+      c = gold * (0.035 + 0.2 * lit) + mix(vec3(1.0, 0.78, 0.42), film, 0.18) * sheen * (0.12 + 0.4 * diff);
+    }
     c = mix(c, vec3(1.0), uHighlight * 0.45);
     gl_FragColor = vec4(c, uOpacity);
   }`;
@@ -61,7 +77,7 @@ export class Tracts {
     parent.add(this.group);
     this.width = 0.5;
     this.density = 0.6;
-    this.mode = 0; // 0 = direction, 1 = bundle colour
+    this.mode = 0; // 0 = direction, 1 = bundle colour, 2 = gold
     this.opacity = 1;
     this.catOn = Object.fromEntries(desc.categories.map((c) => [c, true]));
     this.items = desc.bundles.map((b) => ({ ...b, on: true, mesh: null }));

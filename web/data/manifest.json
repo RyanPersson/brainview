@@ -11222,5 +11222,1047 @@
     ]
    }
   ]
+ },
+ "flow": {
+  "description": "An illustrative model, not a recording: anatomy from the tract atlas, the direction of each pathway from established anatomy, and timing modelled.",
+  "nodes": [
+   {
+    "id": "R.entorhinal",
+    "name": "Right entorhinal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "entorhinal"
+   },
+   {
+    "id": "L.inferiortemporal",
+    "name": "Left inferior temporal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "inferiortemporal"
+   },
+   {
+    "id": "R.inferiortemporal",
+    "name": "Right inferior temporal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "inferiortemporal"
+   },
+   {
+    "id": "L.temporalpole",
+    "name": "Left temporal pole",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "temporalpole"
+   },
+   {
+    "id": "R.lateraloccipital",
+    "name": "Right lateral occipital",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "lateraloccipital"
+   },
+   {
+    "id": "L.lateraloccipital",
+    "name": "Left lateral occipital",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "lateraloccipital"
+   },
+   {
+    "id": "R.lingual",
+    "name": "Right lingual",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "lingual"
+   },
+   {
+    "id": "R.fusiform",
+    "name": "Right fusiform",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "fusiform"
+   },
+   {
+    "id": "R.temporalpole",
+    "name": "Right temporal pole",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "temporalpole"
+   },
+   {
+    "id": "L.fusiform",
+    "name": "Left fusiform",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "fusiform"
+   },
+   {
+    "id": "R.lateralorbitofrontal",
+    "name": "Right lateral orbitofrontal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "lateralorbitofrontal"
+   },
+   {
+    "id": "R.pericalcarine",
+    "name": "Right pericalcarine",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "pericalcarine"
+   },
+   {
+    "id": "L.middletemporal",
+    "name": "Left middle temporal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "middletemporal"
+   },
+   {
+    "id": "L.pericalcarine",
+    "name": "Left pericalcarine",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "pericalcarine"
+   },
+   {
+    "id": "R.medialorbitofrontal",
+    "name": "Right medial orbitofrontal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "medialorbitofrontal"
+   },
+   {
+    "id": "L.lateralorbitofrontal",
+    "name": "Left lateral orbitofrontal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "lateralorbitofrontal"
+   },
+   {
+    "id": "L.lingual",
+    "name": "Left lingual",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "lingual"
+   },
+   {
+    "id": "L.medialorbitofrontal",
+    "name": "Left medial orbitofrontal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "medialorbitofrontal"
+   },
+   {
+    "id": "L.rostralmiddlefrontal",
+    "name": "Left rostral middle frontal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "rostralmiddlefrontal"
+   },
+   {
+    "id": "L.parsopercularis",
+    "name": "Left pars opercularis",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "parsopercularis"
+   },
+   {
+    "id": "L.caudalmiddlefrontal",
+    "name": "Left caudal middle frontal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "caudalmiddlefrontal"
+   },
+   {
+    "id": "L.precentral",
+    "name": "Left precentral",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "precentral"
+   },
+   {
+    "id": "L.superiortemporal",
+    "name": "Left superior temporal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "superiortemporal"
+   },
+   {
+    "id": "R.rostralmiddlefrontal",
+    "name": "Right rostral middle frontal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "rostralmiddlefrontal"
+   },
+   {
+    "id": "R.middletemporal",
+    "name": "Right middle temporal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "middletemporal"
+   },
+   {
+    "id": "R.caudalmiddlefrontal",
+    "name": "Right caudal middle frontal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "caudalmiddlefrontal"
+   },
+   {
+    "id": "R.parstriangularis",
+    "name": "Right pars triangularis",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "parstriangularis"
+   },
+   {
+    "id": "R.bankssts",
+    "name": "Right banks of the superior temporal sulcus",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "bankssts"
+   },
+   {
+    "id": "R.parsopercularis",
+    "name": "Right pars opercularis",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "parsopercularis"
+   },
+   {
+    "id": "R.parsorbitalis",
+    "name": "Right pars orbitalis",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "parsorbitalis"
+   },
+   {
+    "id": "mgn.L",
+    "name": "Left thalamus: hearing relay (MGN)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "L.transversetemporal",
+    "name": "Left transverse temporal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "transversetemporal"
+   },
+   {
+    "id": "L.bankssts",
+    "name": "Left banks of the superior temporal sulcus",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "bankssts"
+   },
+   {
+    "id": "L.inferiorparietal",
+    "name": "Left inferior parietal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "inferiorparietal"
+   },
+   {
+    "id": "mgn.R",
+    "name": "Right thalamus: hearing relay (MGN)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "R.transversetemporal",
+    "name": "Right transverse temporal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "transversetemporal"
+   },
+   {
+    "id": "R.inferiorparietal",
+    "name": "Right inferior parietal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "inferiorparietal"
+   },
+   {
+    "id": "R.superiortemporal",
+    "name": "Right superior temporal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "superiortemporal"
+   },
+   {
+    "id": "R.insula",
+    "name": "Right insula",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "insula"
+   },
+   {
+    "id": "R.supramarginal",
+    "name": "Right supramarginal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "supramarginal"
+   },
+   {
+    "id": "L.superiorfrontal",
+    "name": "Left superior frontal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "superiorfrontal"
+   },
+   {
+    "id": "L.parstriangularis",
+    "name": "Left pars triangularis",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "parstriangularis"
+   },
+   {
+    "id": "R.superiorfrontal",
+    "name": "Right superior frontal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "superiorfrontal"
+   },
+   {
+    "id": "R.precentral",
+    "name": "Right precentral",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "precentral"
+   },
+   {
+    "id": "cbx.L",
+    "name": "Left cerebellar cortex",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "cbx.R",
+    "name": "Right cerebellar cortex",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "R.superiorparietal",
+    "name": "Right superior parietal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "superiorparietal"
+   },
+   {
+    "id": "R.frontalpole",
+    "name": "Right frontal pole",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "frontalpole"
+   },
+   {
+    "id": "L.superiorparietal",
+    "name": "Left superior parietal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "superiorparietal"
+   },
+   {
+    "id": "R.precuneus",
+    "name": "Right precuneus",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "precuneus"
+   },
+   {
+    "id": "L.precuneus",
+    "name": "Left precuneus",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "precuneus"
+   },
+   {
+    "id": "L.supramarginal",
+    "name": "Left supramarginal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "supramarginal"
+   },
+   {
+    "id": "L.parsorbitalis",
+    "name": "Left pars orbitalis",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "parsorbitalis"
+   },
+   {
+    "id": "R.parahippocampal",
+    "name": "Right parahippocampal",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "parahippocampal"
+   },
+   {
+    "id": "R.paracentral",
+    "name": "Right paracentral",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "paracentral"
+   },
+   {
+    "id": "L.paracentral",
+    "name": "Left paracentral",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "paracentral"
+   },
+   {
+    "id": "R.postcentral",
+    "name": "Right postcentral",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "postcentral"
+   },
+   {
+    "id": "L.postcentral",
+    "name": "Left postcentral",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "postcentral"
+   },
+   {
+    "id": "L.frontalpole",
+    "name": "Left frontal pole",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "frontalpole"
+   },
+   {
+    "id": "R.cuneus",
+    "name": "Right cuneus",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "cuneus"
+   },
+   {
+    "id": "L.parahippocampal",
+    "name": "Left parahippocampal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "parahippocampal"
+   },
+   {
+    "id": "L.insula",
+    "name": "Left insula",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "insula"
+   },
+   {
+    "id": "L.entorhinal",
+    "name": "Left entorhinal",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "entorhinal"
+   },
+   {
+    "id": "R.isthmuscingulate",
+    "name": "Right isthmus cingulate",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "isthmuscingulate"
+   },
+   {
+    "id": "L.cuneus",
+    "name": "Left cuneus",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "cuneus"
+   },
+   {
+    "id": "eyemuscles.L",
+    "name": "Left eye muscles",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "eyemotor.L",
+    "name": "Left eye-movement nuclei (midbrain)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "eyemuscles.R",
+    "name": "Right eye muscles",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "eyemotor.R",
+    "name": "Right eye-movement nuclei (midbrain)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "eye.L",
+    "name": "Left eye (retina)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "lgn.L",
+    "name": "Left thalamus: visual relay (LGN)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "eye.R",
+    "name": "Right eye (retina)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "lgn.R",
+    "name": "Right thalamus: visual relay (LGN)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "ear.L",
+    "name": "Left inner ear",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "cochlear.L",
+    "name": "Left cochlear nuclei",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "cochlear.R",
+    "name": "Right cochlear nuclei",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "ear.R",
+    "name": "Right inner ear",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "facial_nuc.L",
+    "name": "Left facial nucleus",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "face_muscles.L",
+    "name": "Left face muscles",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "face_muscles.R",
+    "name": "Right face muscles",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "facial_nuc.R",
+    "name": "Right facial nucleus",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "face_sense.L",
+    "name": "Left face & mouth (touch)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "trigeminal.L",
+    "name": "Left trigeminal nuclei",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "face_sense.R",
+    "name": "Right face & mouth (touch)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "trigeminal.R",
+    "name": "Right trigeminal nuclei",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "cord_motor",
+    "name": "Spinal cord (to the muscles)",
+    "kind": "deep",
+    "hemi": ""
+   },
+   {
+    "id": "striatum.L",
+    "name": "Left striatum (caudate & putamen)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "striatum.R",
+    "name": "Right striatum (caudate & putamen)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "olive.L",
+    "name": "Left inferior olive",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "red.L",
+    "name": "Left red nucleus",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "olive.R",
+    "name": "Right inferior olive",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "red.R",
+    "name": "Right red nucleus",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "md.L",
+    "name": "Left thalamus: mediodorsal nucleus",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "pul.L",
+    "name": "Left thalamus: pulvinar",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "vpl.L",
+    "name": "Left thalamus: body-sense relay (VPL/VPM)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "vl.L",
+    "name": "Left thalamus: motor relay (VA/VL)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "md.R",
+    "name": "Right thalamus: mediodorsal nucleus",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "pul.R",
+    "name": "Right thalamus: pulvinar",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "vl.R",
+    "name": "Right thalamus: motor relay (VA/VL)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "vpl.R",
+    "name": "Right thalamus: body-sense relay (VPL/VPM)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "L.posteriorcingulate",
+    "name": "Left posterior cingulate",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "posteriorcingulate"
+   },
+   {
+    "id": "L.isthmuscingulate",
+    "name": "Left isthmus cingulate",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "isthmuscingulate"
+   },
+   {
+    "id": "L.rostralanteriorcingulate",
+    "name": "Left rostral anterior cingulate",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "rostralanteriorcingulate"
+   },
+   {
+    "id": "L.caudalanteriorcingulate",
+    "name": "Left caudal anterior cingulate",
+    "kind": "cortex",
+    "hemi": "L",
+    "dk": "caudalanteriorcingulate"
+   },
+   {
+    "id": "R.posteriorcingulate",
+    "name": "Right posterior cingulate",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "posteriorcingulate"
+   },
+   {
+    "id": "R.caudalanteriorcingulate",
+    "name": "Right caudal anterior cingulate",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "caudalanteriorcingulate"
+   },
+   {
+    "id": "R.rostralanteriorcingulate",
+    "name": "Right rostral anterior cingulate",
+    "kind": "cortex",
+    "hemi": "R",
+    "dk": "rostralanteriorcingulate"
+   },
+   {
+    "id": "hypothalamus",
+    "name": "Hypothalamus",
+    "kind": "deep",
+    "hemi": ""
+   },
+   {
+    "id": "medulla_auto",
+    "name": "Medulla (autonomic centres)",
+    "kind": "deep",
+    "hemi": ""
+   },
+   {
+    "id": "pons",
+    "name": "Pontine nuclei",
+    "kind": "deep",
+    "hemi": ""
+   },
+   {
+    "id": "mammillary",
+    "name": "Mammillary bodies",
+    "kind": "deep",
+    "hemi": ""
+   },
+   {
+    "id": "hippocampus.L",
+    "name": "Left hippocampus",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "hippocampus.R",
+    "name": "Right hippocampus",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "ic.L",
+    "name": "Left inferior colliculus",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "ic.R",
+    "name": "Right inferior colliculus",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "vestib.L",
+    "name": "Left vestibular nuclei",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "vestib.R",
+    "name": "Right vestibular nuclei",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "dcn.L",
+    "name": "Left dorsal column nuclei (touch & limb position)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "dcn.R",
+    "name": "Right dorsal column nuclei (touch & limb position)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "pretectum.R",
+    "name": "Right pretectum (midbrain)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "pretectum.L",
+    "name": "Left pretectum (midbrain)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "reticular.R",
+    "name": "Right reticular formation",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "reticular.L",
+    "name": "Left reticular formation",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "dcbn.L",
+    "name": "Left deep cerebellar nuclei",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "dcbn.R",
+    "name": "Right deep cerebellar nuclei",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "cord_sense.L",
+    "name": "Left spinal cord (pain & temperature)",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "cord_sense.R",
+    "name": "Right spinal cord (pain & temperature)",
+    "kind": "deep",
+    "hemi": "R"
+   },
+   {
+    "id": "ant.L",
+    "name": "Left thalamus: anterior nucleus",
+    "kind": "deep",
+    "hemi": "L"
+   },
+   {
+    "id": "ant.R",
+    "name": "Right thalamus: anterior nucleus",
+    "kind": "deep",
+    "hemi": "R"
+   }
+  ],
+  "links": {
+   "url": "data/flow/links.bin.gz",
+   "dtype": "uint16",
+   "length": 94308
+  },
+  "relays": [
+   [
+    113,
+    30,
+    2,
+    "brachium of the inferior colliculus"
+   ],
+   [
+    114,
+    34,
+    2,
+    "brachium of the inferior colliculus"
+   ],
+   [
+    74,
+    114,
+    3,
+    "crossed hearing pathway (superior olive)"
+   ],
+   [
+    75,
+    113,
+    3,
+    "crossed hearing pathway (superior olive)"
+   ],
+   [
+    89,
+    95,
+    2,
+    "cerebellar output continuing to the motor thalamus"
+   ],
+   [
+    91,
+    98,
+    2,
+    "cerebellar output continuing to the motor thalamus"
+   ],
+   [
+    44,
+    123,
+    3,
+    "Purkinje cells to the deep cerebellar nuclei"
+   ],
+   [
+    45,
+    124,
+    3,
+    "Purkinje cells to the deep cerebellar nuclei"
+   ],
+   [
+    82,
+    99,
+    3,
+    "trigeminothalamic tract"
+   ],
+   [
+    84,
+    94,
+    3,
+    "trigeminothalamic tract"
+   ],
+   [
+    62,
+    111,
+    3,
+    "perforant path"
+   ],
+   [
+    0,
+    112,
+    3,
+    "perforant path"
+   ],
+   [
+    110,
+    127,
+    3,
+    "mammillothalamic tract"
+   ],
+   [
+    110,
+    128,
+    3,
+    "mammillothalamic tract"
+   ],
+   [
+    86,
+    95,
+    8,
+    "basal ganglia loop through the pallidum"
+   ],
+   [
+    87,
+    98,
+    8,
+    "basal ganglia loop through the pallidum"
+   ],
+   [
+    115,
+    44,
+    3,
+    "vestibulocerebellar fibres"
+   ],
+   [
+    116,
+    45,
+    3,
+    "vestibulocerebellar fibres"
+   ]
+  ],
+  "notes": {
+   "AC": "Two-way: links matching areas of the two hemispheres, in both directions.",
+   "AF_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "AF_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "AR_L": "One-way: from the thalamus (MGN) up to the auditory cortex.",
+   "AR_R": "One-way: from the thalamus (MGN) up to the auditory cortex.",
+   "AST_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "AST_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "CB_L": "Two-way: fibres within the cerebellum.",
+   "CB_R": "Two-way: fibres within the cerebellum.",
+   "CC": "Two-way: links matching areas of the two hemispheres, in both directions.",
+   "CCMid": "Two-way: links matching areas of the two hemispheres, in both directions.",
+   "CC_ForcepsMajor": "Two-way: links matching areas of the two hemispheres, in both directions.",
+   "CC_ForcepsMinor": "Two-way: links matching areas of the two hemispheres, in both directions.",
+   "CNIII_L": "One-way: from the midbrain out to the eye muscles.",
+   "CNIII_R": "One-way: from the midbrain out to the eye muscles.",
+   "CNII_L": "One-way: from the eye back to the thalamus (LGN).",
+   "CNII_R": "One-way: from the eye back to the thalamus (LGN).",
+   "CNIV_L": "One-way: from the midbrain out to an eye muscle.",
+   "CNIV_R": "One-way: from the midbrain out to an eye muscle.",
+   "CNVIII_L": "One-way: from the inner ear into the brainstem.",
+   "CNVIII_R": "One-way: from the inner ear into the brainstem.",
+   "CNVII_L": "One-way: from the brainstem out to the face muscles.",
+   "CNVII_R": "One-way: from the brainstem out to the face muscles.",
+   "CNV_L": "Mostly one-way: touch from the face and mouth into the brainstem.",
+   "CNV_R": "Mostly one-way: touch from the face and mouth into the brainstem.",
+   "CST_L": "One-way: from motor cortex down to the spinal cord (movement).",
+   "CST_R": "One-way: from motor cortex down to the spinal cord (movement).",
+   "CS_L": "One-way: from the cortex down to the striatum.",
+   "CS_R": "One-way: from the cortex down to the striatum.",
+   "CTT_L": "One-way: from the red nucleus down to the inferior olive.",
+   "CTT_R": "One-way: from the red nucleus down to the inferior olive.",
+   "CT_L": "Two-way: thalamus to cortex and back; each cortical area has its own thalamic relay.",
+   "CT_R": "Two-way: thalamus to cortex and back; each cortical area has its own thalamic relay.",
+   "C_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "C_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "DLF_L": "Two-way: hypothalamus and brainstem autonomic centres.",
+   "DLF_R": "Two-way: hypothalamus and brainstem autonomic centres.",
+   "EMC_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "EMC_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "FPT_L": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "FPT_R": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "F_L_R": "One-way: from the hippocampus to the mammillary bodies.",
+   "ICP_L": "One-way: from the medulla (inferior olive) into the cerebellum.",
+   "ICP_R": "One-way: from the medulla (inferior olive) into the cerebellum.",
+   "IFOF_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "IFOF_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "ILF_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "ILF_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "LL_L": "One-way: hearing, up from the cochlear nuclei to the midbrain.",
+   "LL_R": "One-way: hearing, up from the cochlear nuclei to the midbrain.",
+   "MCP": "One-way: from the pons outward into both cerebellar hemispheres.",
+   "MLF_L": "Two-way: links balance and eye-movement nuclei.",
+   "MLF_R": "Two-way: links balance and eye-movement nuclei.",
+   "ML_L": "One-way: touch and limb position, up to the thalamus.",
+   "ML_R": "One-way: touch and limb position, up to the thalamus.",
+   "MdLF_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "MdLF_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "OPT_L": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "OPT_R": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "OR_L": "One-way: from the thalamus (LGN) up to the visual cortex.",
+   "OR_R": "One-way: from the thalamus (LGN) up to the visual cortex.",
+   "PC": "Two-way: joins the pretectal areas (pupil reflex).",
+   "PPT_L": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "PPT_R": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "RST_L": "One-way: from the brainstem down to the spinal cord.",
+   "RST_R": "One-way: from the brainstem down to the spinal cord.",
+   "SCP": "One-way: the cerebellum's output, to the red nucleus and motor thalamus.",
+   "SLF_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "SLF_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "STT_L": "One-way: pain and temperature, up to the thalamus.",
+   "STT_R": "One-way: pain and temperature, up to the thalamus.",
+   "TPT_L": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "TPT_R": "One-way: from the cortex down to the pons, then on to the cerebellum.",
+   "UF_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "UF_R": "Two-way: association fibres carry signals in both directions between these areas.",
+   "V": "Two-way: across the vermis, between the cerebellar hemispheres.",
+   "VOF_L": "Two-way: association fibres carry signals in both directions between these areas.",
+   "VOF_R": "Two-way: association fibres carry signals in both directions between these areas."
+  }
  }
 }
