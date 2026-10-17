@@ -83,3 +83,13 @@ for the HCP-derived layers. [DATA-LICENSES.md](DATA-LICENSES.md) lists which ter
 files, along with citations. The full license texts are in [web/licenses/](web/licenses/).
 
 Brainview is for learning and exploring. It is not for clinical use.
+
+## License
+
+Brainview's code is under the MIT License; see [LICENSE](LICENSE). That covers `web/index.html`,
+`web/style.css`, `web/js/`, `build/`, `tools/`, `serve.py` and the workflow. The MIT License does
+**not** cover:
+
+- the data in `web/data/`, which keeps the licenses of its sources (see *Credits and data licenses*
+  above and [DATA-LICENSES.md](DATA-LICENSES.md));
+- the vendored libraries in `web/vendor/`, which come with their own MIT licenses.

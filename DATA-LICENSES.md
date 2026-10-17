@@ -1,7 +1,8 @@
 # Data credits and licenses
 
 Everything in `web/data/` is derived from the open datasets below, and each one stays under its
-own terms. None of the files are the originals. Brainview has converted all of them to compact
+own terms. The MIT License in [LICENSE](LICENSE) covers only Brainview's code, not this data.
+None of the files are the originals. Brainview has converted all of them to compact
 binaries, moved the surfaces from MNI305 into MNI152 space, quantized positions to 16 bits and
 intensities to 8 bits, and turned label maps into colour-table indices. It has also computed the
 inflated surfaces, the pial–white distance map and every 3D mesh from the volumes, and subsampled
