@@ -107,7 +107,7 @@ const massp = new MeshGroup(groups.massp, brain);
 const thalamic = new MeshGroup(groups.thalamic, brain);
 const context = new MeshGroup(groups.context, brain, { style: 'xray' });
 const tracts = new Tracts(man.tracts, brain);
-const flow = new SignalFlow(man.flow, tracts, brain);
+const flow = new SignalFlow(man.flow, tracts, brain, man.ftract);
 const store = new VolumeStore(man.volumes);
 const slices = new Slices(store, brain);
 const volume = new VolumeRender(store, brain);
@@ -289,11 +289,12 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
     onToggle: (v) => { tracts.setVisible(v); if (v) withBusy('tracts', 'Loading tracts…', tracts.load()); requestRender(); },
   });
   const key = ui.note(s.body, 'Red: left–right · green: front–back · blue: up–down', 'desc');
-  key.hidden = tracts.mode !== 0;
+  key.hidden = tracts.mode !== 0 && tracts.mode !== 3;
   ui.select(s.body, 'Colour by', [
-    { value: '0', label: 'Fibre direction' }, { value: '1', label: 'Bundle' }, { value: '2', label: 'Gold' }],
+    { value: '0', label: 'Fibre direction' }, { value: '3', label: 'Fibre direction (dark)' },
+    { value: '1', label: 'Bundle' }, { value: '2', label: 'Gold' }],
   String(tracts.mode),
-  (v) => { tracts.mode = +v; key.hidden = v !== '0'; tracts.apply(); requestRender(); }).row.after(key);
+  (v) => { tracts.mode = +v; key.hidden = v !== '0' && v !== '3'; tracts.apply(); requestRender(); }).row.after(key);
   ui.slider(s.body, 'Width', {
     min: 0.1, max: 2, step: 0.05, value: tracts.width, format: (v) => `${v.toFixed(2)} mm`,
     onInput: (v) => { tracts.width = v; tracts.apply(); requestRender(); },
@@ -334,16 +335,51 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
 // Signal flow
 {
   const s = ui.section(panel, 'Signal flow', {
-    checked: true, open: true, hint: man.flow.description,
+    checked: true, open: true,
+    hint: man.ftract ? 'Signals travelling the white-matter tracts: illustrative models built from textbook '
+      + 'anatomy, or measured responses from intracranial recordings (F-TRACT).' : man.flow.description,
     onToggle: (v) => { flow.setVisible(v); if (v) withBusy('flow', 'Loading tracts…', flow.load()); requestRender(); },
   });
   const desc = ui.note(s.body, '', 'desc');
-  const describe = () => { desc.textContent = flow.scenario.text; };
-  ui.select(s.body, 'Scenario', SCENARIOS.map((x) => ({ value: x.id, label: x.label })), flow.scenario.id, (v) => {
+  const scenarios = SCENARIOS.filter((x) => !x.measured || man.ftract).map((x) => ({
+    value: x.id, label: x.label, group: man.ftract ? (x.measured ? 'Measured' : 'Modelled') : undefined,
+  }));
+  const scenario = ui.select(s.body, 'Scenario', scenarios, flow.scenario.id, (v) => {
     flow.setScenario(v);
     describe();
     requestRender();
-  }).row.after(desc);
+  });
+  scenario.row.after(desc);
+  // measured mode: which area is stimulated, and what responded
+  let stimulus = null, fewest = null, readout = null;
+  if (man.ftract) {
+    const areas = flow.stimulable();
+    stimulus = ui.select(s.body, 'Stimulated area', [
+      { value: 'L', label: 'Each left area in turn' }, { value: 'R', label: 'Each right area in turn' },
+      ...areas.map((p) => ({ value: String(p.index), label: p.label, group: p.label.split(' ')[0] })),
+    ], flow.stimulus, (v) => { flow.setStimulus(v === 'L' || v === 'R' ? v : Number(v)); requestRender(); });
+    fewest = ui.slider(s.body, 'Fewest recordings', {
+      min: 5, max: 200, step: 5, value: flow.minRecordings, format: (v) => `${v}`,
+      onInput: (v) => { flow.minRecordings = v; },
+    });
+    readout = ui.note(s.body, '', 'desc');
+    const pct = (x) => `${Math.round(x * 100)}%`;
+    flow.onStimulus = ({ parcel, responses }) => {
+      const first = responses.slice(0, 4).map((r) => `${r.parcel.label} after ${Math.round(r.onset)} ms `
+        + `(${pct(r.probability)} of ${Math.round(r.recordings)} tests)`);
+      const med = responses.length ? responses[responses.length >> 1].onset : 0;
+      readout.textContent = responses.length
+        ? `Stimulating ${parcel.label}: ${responses.length} areas responded, half of them within `
+          + `${Math.round(med)} ms. First: ${first.join('; ')}.`
+        : `Stimulating ${parcel.label}: no response measured ${flow.minRecordings} or more times.`;
+    };
+  }
+  const describe = () => {
+    desc.textContent = flow.scenario.text;
+    stimulus?.setEnabled(!!flow.scenario.measured);
+    fewest?.setEnabled(!!flow.scenario.measured);
+    if (readout) readout.hidden = !flow.scenario.measured;
+  };
   describe();
   const btns = ui.buttons(s.body, [
     {

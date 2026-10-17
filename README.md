@@ -17,7 +17,7 @@ one common space, MNI152NLin2009cAsym (millimetres, RAS), so the layers can be s
 | MRI slices | T1, T2 and GM/WM/CSF probability maps | Axial, coronal and sagittal planes, with an optional label overlay (aseg, MASSP, thalamic, tissue class). |
 | Volume rendering | The same volumes, ray-marched on the GPU | Iso-surface, translucent, or maximum-intensity projection, optionally coloured by labels. |
 | Context | Brain hull from the template's brain mask; head (skin) from the full-head T1 | Glass or solid. |
-| Signal flow | An illustrative model of signals travelling the tracts (this `dynamic` branch) | Pulses flow along the streamlines as comets, bright head first, and the areas they reach light up. Scenarios: resting activity, seeing, hearing, touch, movement, and a deep-sleep slow wave. Gold tract shading. Speed, brightness and glow width. Hovering a tract says which way it carries signals. |
+| Signal flow | Signals travelling the tracts (this `dynamic` branch): an illustrative model, and measured stimulation responses from the F-TRACT atlas | Pulses flow along the streamlines as comets, bright head first, and the areas they reach light up. Modelled scenarios: resting activity, seeing, hearing, touch, movement, and a deep-sleep slow wave. Measured: stimulate one area (or each in turn) and watch the areas that responded light up at their recorded latencies. Gold or dark fibre-direction tract shading. Speed, brightness and glow width. Hovering a tract says which way it carries signals. |
 | TMS targets | Published TMS treatment targets: depression (left DLPFC by the 5-cm rule, F3 and connectivity; right DLPFC), OCD, smoking cessation, migraine, and the motor hotspot that sets the dose | A dot on the brain target, a ring where the coil sits on the scalp, labels, and the use, method and source on hover. Group averages, for learning only. |
 
 The cut-away plane clips every 3D layer. Hovering anything names it: the region in the current
@@ -25,8 +25,12 @@ atlas, the structure, the tract, or the label under a slice. The MNI coordinate 
 
 ## Signal flow
 
-The `dynamic` branch adds signals moving through the tracts. It is a model, not a recording, and these
-are its parts:
+The `dynamic` branch adds signals moving through the tracts. It's private: it pushes only to a bare
+repository on the OptiPlex, never to GitHub, because the measured mode uses F-TRACT data, which is free
+for research use only. A `pre-push` hook in `.git/hooks` (not versioned) refuses to send the branch, or any commit
+with F-TRACT files, to GitHub.
+
+The modelled scenarios are a model, not a recording, and these are its parts:
 
 - **Anatomy, from the data.** The streamlines are the tract atlas. `build.py flow` assigns each streamline
   end to the Desikan–Killiany area or the deep nucleus it reaches (thalamic relays, pons, cerebellum,
@@ -43,10 +47,28 @@ are its parts:
   follows the front-to-back travel of slow waves (Massimini et al. 2004,
   [doi:10.1523/JNEUROSCI.1318-04.2004](https://doi.org/10.1523/JNEUROSCI.1318-04.2004)).
 
-Measured human directed connectivity exists. The F-TRACT atlas of intracranial stimulation
-([Lemaréchal et al. 2022](https://doi.org/10.1093/brain/awab362), data on
-[Zenodo](https://zenodo.org/record/7015414)) gives response probabilities and axonal delays between
-areas. Its terms are research-use only, so its data isn't bundled here. Only the median velocity is used.
+### Measured: stimulation responses (F-TRACT)
+
+The F-TRACT atlas ([Trebaul et al. 2018](https://doi.org/10.1016/j.neuroimage.2018.07.039),
+[Lemaréchal et al. 2022](https://doi.org/10.1093/brain/awab362), v2112 on
+[Zenodo](https://zenodo.org/records/7015415)) pools cortico-cortical evoked potentials from 780 epilepsy
+patients with intracranial electrodes: one area gets a single electrical pulse, and the others are
+recorded. For each ordered pair of areas it gives how often a response appeared, its onset and peak
+latency, and an estimated axonal conduction delay. That's a measured direction: A drives B.
+
+`tools/fetch_ftract.py` pulls only the files used (the Lausanne2008-33 parcellation, adults 15 and up)
+out of the 915 MB zip with HTTP range requests. `build.py ftract` maps the parcels onto the flow model's
+nodes (68 cortical areas, plus hippocampus, caudate and putamen, and the thalamus as all its relay
+nodes) and writes `web/data/ftract/`. Pallidum, accumbens, amygdala and brainstem have no node and are left out.
+
+In the viewer the stimulated area flashes at time 0. Pulses run from it along the streamlines that join it
+to each responding area, taking that pair's axonal delay, and each area lights at its onset latency,
+which also counts time spent in synapses. Brightness follows the response probability; most measured
+pairs respond more often than not (median 0.9), so the scale starts at 0.5. Pairs tested fewer times
+than *Fewest recordings* (default 20) are left out: the thinly sampled ones run to extremes, such as
+0 ms onsets. Responding areas with no streamline between them only light up. The fibres are the
+tract atlas's, not the ones F-TRACT measured its distances on, so each pulse's speed is this
+streamline's length over the measured delay.
 
 The look follows Greg Dunn and Brian Edwards' *Self Reflected*: gold fibres on black, a sagittal cut,
 and light running through the circuits.
@@ -54,12 +76,13 @@ and light running through the circuits.
 ## Layout
 
 ```
-build/build.py   raw/ → web/data/  (cortex | atlases | meshes | tracts | flow | volumes | tms | check)
+build/build.py   raw/ → web/data/  (cortex | atlases | meshes | tracts | flow | ftract | volumes | tms | check)
 serve.py         plain no-cache static server for web/ (the viewer inflates the *.bin.gz data itself)
 web/             index.html, style.css, js/ (main, cortex, meshes, tracts, flow, volume, ui, …), vendor/ (three r186, three-mesh-bvh),
                  licenses/ (data license texts, deployed with the site)
 raw/             downloaded datasets (not needed at runtime)
 tools/shot.mjs   headless Chrome screenshots / smoke tests: node tools/shot.mjs "name::<js using B = window.brainview>"
+tools/fetch_ftract.py  the F-TRACT files the ftract step needs (range requests into the Zenodo zip)
 ```
 
 The server runs as `brainview.service` (systemd user unit, 127.0.0.1:8051) behind
@@ -86,6 +109,7 @@ Downloads go into `raw/`:
 - TemplateFlow S3 (`tpl-fsaverage`, `tpl-MNI152NLin2009cAsym`)
 - figshare 5528816/5528819 (HCP-MMP1 annotations)
 - figshare 13638644 (`Atlas_80_Bundles.zip`)
+- F-TRACT v2112, Zenodo 7015415: run `python3 -I tools/fetch_ftract.py` first (about 140 MB of transfer)
 
 The fsaverage surfaces are moved from MNI305 into MNI152 with FreeSurfer's published affine. Run
 `build.py check` to confirm the fit: it samples the template's GM probability at the

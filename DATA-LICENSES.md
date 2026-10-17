@@ -64,6 +64,21 @@ atlas and the aseg segmentation, and keep their terms. The direction of each bun
 neuroanatomy, not data. The deep-sleep scenario follows Massimini et al. 2004,
 [doi:10.1523/JNEUROSCI.1318-04.2004](https://doi.org/10.1523/JNEUROSCI.1318-04.2004).
 
+## F-TRACT (private `dynamic` branch only)
+
+`web/data/ftract/` is derived from the F-TRACT atlas v2112 (INSERM; Lausanne2008-33 parcellation, ages
+15–100), [Zenodo 7015415](https://zenodo.org/records/7015415). Its readme says the atlas "is provided for
+free use for research use only", with limited accuracy, and asks users to cite:
+
+- David et al. 2013, Probabilistic functional tractography of the human cortex, *NeuroImage*.
+- Trebaul et al. 2018, Probabilistic functional tractography of the human cortex revisited, *NeuroImage*,
+  [doi:10.1016/j.neuroimage.2018.07.039](https://doi.org/10.1016/j.neuroimage.2018.07.039).
+- Lemaréchal et al. 2022, A brain atlas of axonal and synaptic delays based on modelling of
+  cortico-cortical evoked potentials, *Brain*, [doi:10.1093/brain/awab362](https://doi.org/10.1093/brain/awab362).
+
+The atlas's scripts carry a BSD-style INSERM license. Because of the research-only terms, this data
+stays out of the public repository and the GitHub Pages site.
+
 ## TMS targets
 
 The TMS layer places published coordinates and procedures on the template. They are facts from these

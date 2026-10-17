@@ -12264,5 +12264,610 @@
    "VOF_L": "Two-way: association fibres carry signals in both directions between these areas.",
    "VOF_R": "Two-way: association fibres carry signals in both directions between these areas."
   }
+ },
+ "ftract": {
+  "description": "Measured responses to single-pulse electrical stimulation, recorded with intracranial electrodes in 780 epilepsy patients (F-TRACT atlas v2112, ages 15 and up).",
+  "source": "F-TRACT atlas (Trebaul et al. 2018; Lemar\u00e9chal et al. 2022), free for research use only",
+  "parcels": [
+   {
+    "name": "ctx-lh-cuneus",
+    "label": "Left cuneus",
+    "nodes": [
+     64
+    ]
+   },
+   {
+    "name": "ctx-lh-lateraloccipital",
+    "label": "Left lateral occipital",
+    "nodes": [
+     5
+    ]
+   },
+   {
+    "name": "ctx-lh-lingual",
+    "label": "Left lingual",
+    "nodes": [
+     16
+    ]
+   },
+   {
+    "name": "ctx-lh-pericalcarine",
+    "label": "Left pericalcarine",
+    "nodes": [
+     13
+    ]
+   },
+   {
+    "name": "ctx-lh-bankssts",
+    "label": "Left banks of the superior temporal sulcus",
+    "nodes": [
+     32
+    ]
+   },
+   {
+    "name": "ctx-lh-entorhinal",
+    "label": "Left entorhinal",
+    "nodes": [
+     62
+    ]
+   },
+   {
+    "name": "ctx-lh-fusiform",
+    "label": "Left fusiform",
+    "nodes": [
+     9
+    ]
+   },
+   {
+    "name": "ctx-lh-inferiortemporal",
+    "label": "Left inferior temporal",
+    "nodes": [
+     1
+    ]
+   },
+   {
+    "name": "ctx-lh-middletemporal",
+    "label": "Left middle temporal",
+    "nodes": [
+     12
+    ]
+   },
+   {
+    "name": "ctx-lh-parahippocampal",
+    "label": "Left parahippocampal",
+    "nodes": [
+     60
+    ]
+   },
+   {
+    "name": "ctx-lh-superiortemporal",
+    "label": "Left superior temporal",
+    "nodes": [
+     22
+    ]
+   },
+   {
+    "name": "ctx-lh-temporalpole",
+    "label": "Left temporal pole",
+    "nodes": [
+     3
+    ]
+   },
+   {
+    "name": "ctx-lh-transversetemporal",
+    "label": "Left transverse temporal",
+    "nodes": [
+     31
+    ]
+   },
+   {
+    "name": "ctx-lh-inferiorparietal",
+    "label": "Left inferior parietal",
+    "nodes": [
+     33
+    ]
+   },
+   {
+    "name": "ctx-lh-postcentral",
+    "label": "Left postcentral",
+    "nodes": [
+     57
+    ]
+   },
+   {
+    "name": "ctx-lh-precuneus",
+    "label": "Left precuneus",
+    "nodes": [
+     50
+    ]
+   },
+   {
+    "name": "ctx-lh-superiorparietal",
+    "label": "Left superior parietal",
+    "nodes": [
+     48
+    ]
+   },
+   {
+    "name": "ctx-lh-supramarginal",
+    "label": "Left supramarginal",
+    "nodes": [
+     51
+    ]
+   },
+   {
+    "name": "ctx-lh-caudalanteriorcingulate",
+    "label": "Left caudal anterior cingulate",
+    "nodes": [
+     103
+    ]
+   },
+   {
+    "name": "ctx-lh-isthmuscingulate",
+    "label": "Left isthmus cingulate",
+    "nodes": [
+     101
+    ]
+   },
+   {
+    "name": "ctx-lh-posteriorcingulate",
+    "label": "Left posterior cingulate",
+    "nodes": [
+     100
+    ]
+   },
+   {
+    "name": "ctx-lh-rostralanteriorcingulate",
+    "label": "Left rostral anterior cingulate",
+    "nodes": [
+     102
+    ]
+   },
+   {
+    "name": "ctx-lh-paracentral",
+    "label": "Left paracentral",
+    "nodes": [
+     55
+    ]
+   },
+   {
+    "name": "ctx-lh-caudalmiddlefrontal",
+    "label": "Left caudal middle frontal",
+    "nodes": [
+     20
+    ]
+   },
+   {
+    "name": "ctx-lh-frontalpole",
+    "label": "Left frontal pole",
+    "nodes": [
+     58
+    ]
+   },
+   {
+    "name": "ctx-lh-parsopercularis",
+    "label": "Left pars opercularis",
+    "nodes": [
+     19
+    ]
+   },
+   {
+    "name": "ctx-lh-parstriangularis",
+    "label": "Left pars triangularis",
+    "nodes": [
+     41
+    ]
+   },
+   {
+    "name": "ctx-lh-precentral",
+    "label": "Left precentral",
+    "nodes": [
+     21
+    ]
+   },
+   {
+    "name": "ctx-lh-rostralmiddlefrontal",
+    "label": "Left rostral middle frontal",
+    "nodes": [
+     18
+    ]
+   },
+   {
+    "name": "ctx-lh-superiorfrontal",
+    "label": "Left superior frontal",
+    "nodes": [
+     40
+    ]
+   },
+   {
+    "name": "ctx-lh-lateralorbitofrontal",
+    "label": "Left lateral orbitofrontal",
+    "nodes": [
+     15
+    ]
+   },
+   {
+    "name": "ctx-lh-medialorbitofrontal",
+    "label": "Left medial orbitofrontal",
+    "nodes": [
+     17
+    ]
+   },
+   {
+    "name": "ctx-lh-parsorbitalis",
+    "label": "Left pars orbitalis",
+    "nodes": [
+     52
+    ]
+   },
+   {
+    "name": "ctx-lh-insula",
+    "label": "Left insula",
+    "nodes": [
+     61
+    ]
+   },
+   {
+    "name": "Left-Thalamus-Proper",
+    "label": "Left thalamus",
+    "nodes": [
+     70,
+     30,
+     94,
+     95,
+     92,
+     127,
+     93
+    ]
+   },
+   {
+    "name": "Left-Pallidum",
+    "label": "Left pallidum",
+    "nodes": []
+   },
+   {
+    "name": "Left-Putamen",
+    "label": "Left putamen",
+    "nodes": [
+     86
+    ]
+   },
+   {
+    "name": "Left-Hippocampus",
+    "label": "Left hippocampus",
+    "nodes": [
+     111
+    ]
+   },
+   {
+    "name": "Left-Caudate",
+    "label": "Left caudate",
+    "nodes": [
+     86
+    ]
+   },
+   {
+    "name": "Left-Accumbens-area",
+    "label": "Left nucleus accumbens",
+    "nodes": []
+   },
+   {
+    "name": "Left-Amygdala",
+    "label": "Left amygdala",
+    "nodes": []
+   },
+   {
+    "name": "ctx-rh-cuneus",
+    "label": "Right cuneus",
+    "nodes": [
+     59
+    ]
+   },
+   {
+    "name": "ctx-rh-lateraloccipital",
+    "label": "Right lateral occipital",
+    "nodes": [
+     4
+    ]
+   },
+   {
+    "name": "ctx-rh-lingual",
+    "label": "Right lingual",
+    "nodes": [
+     6
+    ]
+   },
+   {
+    "name": "ctx-rh-pericalcarine",
+    "label": "Right pericalcarine",
+    "nodes": [
+     11
+    ]
+   },
+   {
+    "name": "ctx-rh-bankssts",
+    "label": "Right banks of the superior temporal sulcus",
+    "nodes": [
+     27
+    ]
+   },
+   {
+    "name": "ctx-rh-entorhinal",
+    "label": "Right entorhinal",
+    "nodes": [
+     0
+    ]
+   },
+   {
+    "name": "ctx-rh-fusiform",
+    "label": "Right fusiform",
+    "nodes": [
+     7
+    ]
+   },
+   {
+    "name": "ctx-rh-inferiortemporal",
+    "label": "Right inferior temporal",
+    "nodes": [
+     2
+    ]
+   },
+   {
+    "name": "ctx-rh-middletemporal",
+    "label": "Right middle temporal",
+    "nodes": [
+     24
+    ]
+   },
+   {
+    "name": "ctx-rh-parahippocampal",
+    "label": "Right parahippocampal",
+    "nodes": [
+     53
+    ]
+   },
+   {
+    "name": "ctx-rh-superiortemporal",
+    "label": "Right superior temporal",
+    "nodes": [
+     37
+    ]
+   },
+   {
+    "name": "ctx-rh-temporalpole",
+    "label": "Right temporal pole",
+    "nodes": [
+     8
+    ]
+   },
+   {
+    "name": "ctx-rh-transversetemporal",
+    "label": "Right transverse temporal",
+    "nodes": [
+     35
+    ]
+   },
+   {
+    "name": "ctx-rh-inferiorparietal",
+    "label": "Right inferior parietal",
+    "nodes": [
+     36
+    ]
+   },
+   {
+    "name": "ctx-rh-postcentral",
+    "label": "Right postcentral",
+    "nodes": [
+     56
+    ]
+   },
+   {
+    "name": "ctx-rh-precuneus",
+    "label": "Right precuneus",
+    "nodes": [
+     49
+    ]
+   },
+   {
+    "name": "ctx-rh-superiorparietal",
+    "label": "Right superior parietal",
+    "nodes": [
+     46
+    ]
+   },
+   {
+    "name": "ctx-rh-supramarginal",
+    "label": "Right supramarginal",
+    "nodes": [
+     39
+    ]
+   },
+   {
+    "name": "ctx-rh-caudalanteriorcingulate",
+    "label": "Right caudal anterior cingulate",
+    "nodes": [
+     105
+    ]
+   },
+   {
+    "name": "ctx-rh-isthmuscingulate",
+    "label": "Right isthmus cingulate",
+    "nodes": [
+     63
+    ]
+   },
+   {
+    "name": "ctx-rh-posteriorcingulate",
+    "label": "Right posterior cingulate",
+    "nodes": [
+     104
+    ]
+   },
+   {
+    "name": "ctx-rh-rostralanteriorcingulate",
+    "label": "Right rostral anterior cingulate",
+    "nodes": [
+     106
+    ]
+   },
+   {
+    "name": "ctx-rh-paracentral",
+    "label": "Right paracentral",
+    "nodes": [
+     54
+    ]
+   },
+   {
+    "name": "ctx-rh-caudalmiddlefrontal",
+    "label": "Right caudal middle frontal",
+    "nodes": [
+     25
+    ]
+   },
+   {
+    "name": "ctx-rh-frontalpole",
+    "label": "Right frontal pole",
+    "nodes": [
+     47
+    ]
+   },
+   {
+    "name": "ctx-rh-parsopercularis",
+    "label": "Right pars opercularis",
+    "nodes": [
+     28
+    ]
+   },
+   {
+    "name": "ctx-rh-parstriangularis",
+    "label": "Right pars triangularis",
+    "nodes": [
+     26
+    ]
+   },
+   {
+    "name": "ctx-rh-precentral",
+    "label": "Right precentral",
+    "nodes": [
+     43
+    ]
+   },
+   {
+    "name": "ctx-rh-rostralmiddlefrontal",
+    "label": "Right rostral middle frontal",
+    "nodes": [
+     23
+    ]
+   },
+   {
+    "name": "ctx-rh-superiorfrontal",
+    "label": "Right superior frontal",
+    "nodes": [
+     42
+    ]
+   },
+   {
+    "name": "ctx-rh-lateralorbitofrontal",
+    "label": "Right lateral orbitofrontal",
+    "nodes": [
+     10
+    ]
+   },
+   {
+    "name": "ctx-rh-medialorbitofrontal",
+    "label": "Right medial orbitofrontal",
+    "nodes": [
+     14
+    ]
+   },
+   {
+    "name": "ctx-rh-parsorbitalis",
+    "label": "Right pars orbitalis",
+    "nodes": [
+     29
+    ]
+   },
+   {
+    "name": "ctx-rh-insula",
+    "label": "Right insula",
+    "nodes": [
+     38
+    ]
+   },
+   {
+    "name": "Right-Thalamus-Proper",
+    "label": "Right thalamus",
+    "nodes": [
+     72,
+     34,
+     99,
+     98,
+     96,
+     128,
+     97
+    ]
+   },
+   {
+    "name": "Right-Pallidum",
+    "label": "Right pallidum",
+    "nodes": []
+   },
+   {
+    "name": "Right-Putamen",
+    "label": "Right putamen",
+    "nodes": [
+     87
+    ]
+   },
+   {
+    "name": "Right-Hippocampus",
+    "label": "Right hippocampus",
+    "nodes": [
+     112
+    ]
+   },
+   {
+    "name": "Right-Caudate",
+    "label": "Right caudate",
+    "nodes": [
+     87
+    ]
+   },
+   {
+    "name": "Right-Accumbens-area",
+    "label": "Right nucleus accumbens",
+    "nodes": []
+   },
+   {
+    "name": "Right-Amygdala",
+    "label": "Right amygdala",
+    "nodes": []
+   },
+   {
+    "name": "Brain-Stem",
+    "label": "Brainstem",
+    "nodes": []
+   },
+   {
+    "name": "Unknown",
+    "label": "Unknown",
+    "nodes": []
+   }
+  ],
+  "columns": [
+   "stim",
+   "rec",
+   "probability",
+   "onset",
+   "peak",
+   "delay",
+   "amplitude",
+   "recordings"
+  ],
+  "edges": {
+   "url": "data/ftract/edges.bin.gz",
+   "dtype": "float32",
+   "length": 20080
+  }
  }
 }

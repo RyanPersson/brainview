@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert the downloaded open datasets (raw/) into compact binaries for the web viewer (web/data/).
 
-Usage:  .venv/bin/python -I build/build.py [cortex] [atlases] [meshes] [tracts] [flow] [volumes] [tms] [check]
+Usage:  .venv/bin/python -I build/build.py [cortex] [atlases] [meshes] [tracts] [flow] [ftract] [volumes] [tms] [check]
         (no args = everything; atlases is the parcellation part of cortex, tms needs the meshes)
 
 Every output array is written as  web/data/<name>.bin.gz  (raw little-endian bytes, gzipped;
@@ -1210,6 +1210,88 @@ def build_flow(man):
         "nodes": nodes, "links": save("flow/links", links), "relays": relays, "notes": notes}
 
 
+# ----------------------------------------------------------------------------- F-TRACT
+
+# The F-TRACT atlas (v2112, adults): responses to single-pulse electrical stimulation recorded with intracranial
+# electrodes in 780 epilepsy patients, between the Lausanne2008-33 parcels (the Desikan-Killiany areas plus aseg
+# structures). Free for research use only, so it lives in the private `dynamic` branch; tools/fetch_ftract.py
+# gets the files.
+FTRACT = os.path.join(RAW, "ftract", "extracted", "ages_15_100", "sr_8.40", "seg_None_None", "pl_200",
+                      "Lausanne2008-33")
+FTRACT_FEATURES = ["probability", "onset_latency", "peak_latency", "axonal_conduction_delay", "amplitude"]
+FTRACT_DEEP = {"Hippocampus": ["hippocampus"], "Caudate": ["striatum"], "Putamen": ["striatum"],
+               "Thalamus-Proper": ["lgn", "mgn", "vpl", "vl", "md", "ant", "pul"]}
+
+
+def read_ftract_counts():
+    """Number of recordings behind each probability, from the atlas pickle. Only numpy's array constructors may
+    be unpickled, so the file can't run code."""
+    import io
+    import pickle
+    try:
+        from numpy._core import multiarray as ma, numeric as nu
+    except ImportError:
+        from numpy.core import multiarray as ma, numeric as nu
+    allowed = {("numpy.core.multiarray", "_reconstruct"): ma._reconstruct, ("numpy", "ndarray"): np.ndarray,
+               ("numpy", "dtype"): np.dtype, ("numpy.core.numeric", "_frombuffer"): nu._frombuffer}
+
+    class Safe(pickle.Unpickler):
+        def find_class(self, module, name):
+            if (module, name) not in allowed:
+                raise pickle.UnpicklingError(f"blocked {module}.{name}")
+            return allowed[module, name]
+
+    path = os.path.join(FTRACT, "atlas__ages_15_100__sr_8.40__seg_None_None__pl_200__Lausanne2008-33.pkl.gz")
+    feats = Safe(io.BytesIO(gzip.decompress(open(path, "rb").read()))).load()
+    return np.asarray(feats[0]["count"])  # feature 0 is the probability (its mean over recordings)
+
+
+def build_ftract(man):
+    """Measured stimulation responses between areas, keyed to the flow nodes (run after flow)."""
+    M, names = {}, None
+    for f in FTRACT_FEATURES:
+        with open(os.path.join(FTRACT, "export", f, f"{f}.csv")) as fh:
+            rows = [r.rstrip("\n").split(",") for r in fh if not r.startswith("#")]
+        assert names is None or rows[0][1:] == names
+        names = rows[0][1:]
+        assert [r[0] for r in rows[1:]] == names  # stimulated parcels down, recorded parcels across
+        M[f] = np.array([[float(x) for x in r[1:]] for r in rows[1:]])
+    count = read_ftract_counts()
+    assert count.shape == M["probability"].shape
+
+    index = {n["id"]: i for i, n in enumerate(man["flow"]["nodes"])}
+    parcels = []
+    for nm in names:
+        m = re.match(r"^ctx-(lh|rh)-(\w+)$", nm)
+        s = re.match(r"^(Left|Right)-(.+)$", nm)
+        if m:
+            h = "L" if m.group(1) == "lh" else "R"
+            ids, label = [f"{h}.{m.group(2)}"], ("Left " if h == "L" else "Right ") + pretty_dk(m.group(2)).lower()
+        elif s:
+            h, what = s.group(1)[0], s.group(2)
+            ids = [f"{k}.{h}" for k in FTRACT_DEEP.get(what, [])]
+            label = f"{s.group(1)} " + {"Thalamus-Proper": "thalamus", "Accumbens-area": "nucleus accumbens"}.get(
+                what, what.lower())
+        else:
+            ids, label = [], {"Brain-Stem": "Brainstem"}.get(nm, nm)
+        parcels.append({"name": nm, "label": label, "nodes": [index[i] for i in ids if i in index]})
+
+    # a response needs a probability and an onset latency; the axonal delay can be missing (NaN)
+    P, on = M["probability"], M["onset_latency"]
+    ii, jj = np.nonzero(~np.isnan(P) & ~np.isnan(on) & ~np.eye(len(names), dtype=bool))
+    cols = ["stim", "rec", "probability", "onset", "peak", "delay", "amplitude", "recordings"]
+    edges = np.stack([ii, jj, P[ii, jj], on[ii, jj], M["peak_latency"][ii, jj], M["axonal_conduction_delay"][ii, jj],
+                      M["amplitude"][ii, jj], count[ii, jj]], 1).astype(np.float32)
+    log(f"ftract: {len(names)} parcels, {len(edges)} measured responses "
+        f"(median probability {np.median(edges[:, 2]):.2f}, onset {np.median(edges[:, 3]):.1f} ms, "
+        f"{int(np.isnan(edges[:, 5]).sum())} without an axonal delay)")
+    man["ftract"] = {
+        "description": "Measured responses to single-pulse electrical stimulation, recorded with intracranial "
+                       "electrodes in 780 epilepsy patients (F-TRACT atlas v2112, ages 15 and up).",
+        "source": "F-TRACT atlas (Trebaul et al. 2018; Lemaréchal et al. 2022), free for research use only",
+        "parcels": parcels, "columns": cols, "edges": save("ftract/edges", edges)}
+
+
 def check_alignment():
     """Mean GM probability sampled at fsaverage mid-thickness vertices, with/without MNI305->152."""
     img = nib.load(TF_MNI + "res-01_label-GM_probseg.nii.gz")
@@ -1234,7 +1316,7 @@ def check_alignment():
 
 
 def main():
-    steps = sys.argv[1:] or ["cortex", "meshes", "tracts", "flow", "volumes", "tms"]
+    steps = sys.argv[1:] or ["cortex", "meshes", "tracts", "flow", "ftract", "volumes", "tms"]
     os.makedirs(OUT, exist_ok=True)
     if "check" in steps:
         check_alignment()
@@ -1243,7 +1325,7 @@ def main():
     man["frame"] = "MNI152NLin2009cAsym (RAS, mm)"
     for s in steps:
         {"cortex": build_cortex, "atlases": build_atlases, "meshes": build_meshes, "tracts": build_tracts,
-         "flow": build_flow, "volumes": build_volumes, "tms": build_tms}[s](man)
+         "flow": build_flow, "ftract": build_ftract, "volumes": build_volumes, "tms": build_tms}[s](man)
         with open(MANIFEST_PATH, "w") as fh:
             json.dump(man, fh, indent=1)
     log("done")

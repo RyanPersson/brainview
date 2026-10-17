@@ -58,7 +58,11 @@ export function select(parent, label, options, value, onChange) {
   s.addEventListener('change', () => onChange(s.value));
   row.append(s);
   parent.append(row);
-  return { row, input: s, set: (v) => { s.value = v; } };
+  return {
+    row, input: s,
+    set: (v) => { s.value = v; },
+    setEnabled: (on) => { s.disabled = !on; row.classList.toggle('disabled', !on); },
+  };
 }
 
 export function slider(parent, label, { min, max, step = 0.01, value, format = (v) => v, onInput }) {

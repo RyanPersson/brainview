@@ -7,9 +7,18 @@ import { clipPlanes } from './materials.js';
 // pulses' arrivals fire the nodes at the far ends. Each streamline's pulses go into a float texture, and a glow
 // pass over the tract ribbons draws every pulse as a comet: a sharp bright head with a fading tail behind it,
 // so the direction of travel reads at a glance. Model time is in milliseconds.
+//
+// The measured mode replays the F-TRACT atlas instead of the model: an area is stimulated, pulses run out along
+// the fibres to each area that responded, taking the measured axonal delay, and each area lights up at its
+// measured response latency.
 
 const ROW = 1024; // streamlines per texture row; 3 texels each: pulse slots 0-1, pulse slots 2-3, end flashes
 const SLOTS = 4;
+// A pulse slot is (start time, code); code packs the direction (0: from end A, 1: from end B, 2: out both ways
+// from the mid point), strength (0-99) and speed (units of 0.02 mm/ms) as one integer, exact in a float32.
+const VSTEP = 0.02;
+const pack = (dir, amp, vel) => dir + 3 * Math.round(Math.min(1, amp) * 99)
+  + 300 * Math.max(1, Math.min(999, Math.round(vel / VSTEP)));
 // conduction velocity, mm per ms: 3.9 m/s, the median F-TRACT measured between cortical areas (Lemaréchal 2022)
 export const VELOCITY = 3.9;
 const TAIL = 14; // comet tail, mm
@@ -31,6 +40,10 @@ const vertexShader = /* glsl */`
   flat varying vec4 vP1;
   flat varying vec4 vF;
   flat varying vec2 vLen;
+  float ends(float t0, float code, float len) {
+    float vel = max(floor(floor(code + 0.5) / 300.0) * ${VSTEP}, 0.001);
+    return t0 + (len + ${TAIL.toFixed(1)}) / vel + ${(4 * IMPACT_T).toFixed(1)};
+  }
   void main() {
     int sid = int(flow.z + 0.5);
     ivec2 c = ivec2((sid % ${ROW}) * 3, sid / ${ROW});
@@ -38,10 +51,11 @@ const vertexShader = /* glsl */`
     vP1 = texelFetch(uState, c + ivec2(1, 0), 0);
     vF = texelFetch(uState, c + ivec2(2, 0), 0);
     // nothing lit on this streamline: put the vertex outside the clip volume so it rasterises nothing
-    float latest = max(max(vP0.x, vP0.z), max(vP1.x, vP1.z));
+    float L = flow.y;
+    float last = max(max(ends(vP0.x, vP0.y, L), ends(vP0.z, vP0.w, L)),
+                     max(ends(vP1.x, vP1.y, L), ends(vP1.z, vP1.w, L)));
     float flashed = max(vF.x, vF.z);
-    if (uTime - latest > (flow.y + ${TAIL.toFixed(1)}) / ${VELOCITY.toFixed(1)} + ${(4 * IMPACT_T).toFixed(1)}
-        && uTime - flashed > ${(6 * FLASH_T).toFixed(1)}) {
+    if (uTime > last && uTime - flashed > ${(6 * FLASH_T).toFixed(1)}) {
       gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
       return;
     }
@@ -74,18 +88,19 @@ const fragmentShader = /* glsl */`
   flat varying vec4 vF;
   flat varying vec2 vLen;
 
-  // One pulse: code = direction (0: from end A, 1: from end B, 2: out both ways from vLen.y) + strength (fraction)
+  // One pulse (see pack() for the code)
   float comet(float t0, float code) {
-    float h = (uTime - t0) * ${VELOCITY.toFixed(1)}; // how far the head has travelled, mm
+    float c = floor(code + 0.5);
+    float d = mod(c, 3.0), amp = mod(floor(c / 3.0), 100.0) / 99.0, vel = floor(c / 300.0) * ${VSTEP};
+    float h = (uTime - t0) * vel; // how far the head has travelled, mm
     if (h <= 0.0) return 0.0;
-    float d = floor(code), amp = fract(code) * 1.001;
     float len = vLen.x, mid = vLen.y;
     float x = d < 0.5 ? vArc : d < 1.5 ? len - vArc : abs(vArc - mid);
     float reach = d < 1.5 ? len : (vArc < mid ? mid : len - mid);
     float b = h - x; // distance behind the head
     float I = b >= 0.0 ? pow(max(0.0, 1.0 - b / ${TAIL.toFixed(1)}), 2.2) : exp(b * 3.0);
     float over = h - reach; // past the end: the landing spot flares, then fades
-    if (over > 0.0) I += 1.2 * exp(-over / ${(VELOCITY * IMPACT_T).toFixed(1)}) * exp(-(reach - x) / 2.0);
+    if (over > 0.0) I += 1.2 * exp(-over / (vel * ${IMPACT_T.toFixed(1)})) * exp(-(reach - x) / 2.0);
     return I * amp;
   }
 
@@ -188,11 +203,27 @@ export const SCENARIOS = [
       + '(Massimini et al. 2004). Only cortex-to-cortex bundles carry it here, and the gaps between waves are '
       + 'shortened.',
   },
+  {
+    id: 'ftract', label: 'Stimulation responses (F-TRACT)', measured: true,
+    text: 'Measured, not modelled: in epilepsy surgery planning, electrodes inside the brain give one area a single '
+      + 'small pulse and record which areas respond, and how soon (F-TRACT, 780 patients). The stimulated area '
+      + 'flashes; pulses run along the fibres to each responding area in its estimated axonal delay, and the area '
+      + 'lights when its response began. Brighter = responded more often. Areas with no fibre drawn between them '
+      + 'just light up.',
+  },
 ];
 
+// Brightness for a response probability. Nine in ten measured pairs respond more often than not (median 0.9), so
+// the scale starts at 0.5 to keep the differences visible.
+const shade = (p) => Math.max(0.08, Math.min(1, (p - 0.5) / 0.5)) ** 1.5;
+
 export class SignalFlow {
-  constructor(desc, tracts, parent) {
+  constructor(desc, tracts, parent, measured = null) {
     this.desc = desc;
+    this.measured = measured; // the F-TRACT atlas (man.ftract), when this build has it
+    this.stimulus = 'L'; // measured mode: 'L' / 'R' = each area of that side in turn, or a parcel index
+    this.minRecordings = 20; // measured mode: leave out pairs tested fewer times (small samples run to extremes)
+    this.onStimulus = null; // called with each stimulation's summary
     this.tracts = tracts;
     this.group = new THREE.Group();
     this.group.visible = false;
@@ -229,7 +260,8 @@ export class SignalFlow {
   }
 
   async _load() {
-    const [links] = await Promise.all([fetchArray(this.desc.links), this.tracts.load()]);
+    const [links, edges] = await Promise.all([fetchArray(this.desc.links),
+      this.measured ? fetchArray(this.measured.edges) : null, this.tracts.load()]);
     const nS = links.length / 4, nN = this.desc.nodes.length;
     this.n = nS;
     this.len = new Float32Array(nS);
@@ -306,6 +338,7 @@ export class SignalFlow {
     this.relays = Array.from({ length: nN }, () => []);
     for (const [f, t, delay] of this.desc.relays) this.relays[f].push([t, delay]);
     this.isCortex = this.desc.nodes.map((n) => n.kind === 'cortex');
+    if (edges) this.loadMeasured(edges);
 
     const rows = Math.ceil(nS / ROW);
     this.state = new Float32Array(ROW * 3 * rows * 4);
@@ -321,6 +354,38 @@ export class SignalFlow {
   setVisible(v) {
     this.group.visible = v;
     if (v) this.load();
+  }
+
+  // F-TRACT responses per stimulated parcel, earliest first, and the streamlines joining each pair of nodes.
+  loadMeasured(edges) {
+    const m = this.measured, nc = m.columns.length, nP = m.parcels.length, nN = this.desc.nodes.length;
+    const col = Object.fromEntries(m.columns.map((c, i) => [c, i]));
+    this.responses = Array.from({ length: nP }, () => []);
+    for (let i = 0; i < edges.length; i += nc) {
+      const e = {};
+      for (const c in col) e[c] = edges[i + col[c]];
+      if (m.parcels[e.stim].nodes.length) this.responses[e.stim].push(e);
+    }
+    for (const r of this.responses) r.sort((a, b) => a.onset - b.onset);
+    this.between = new Map();
+    for (let s = 0; s < this.n; s++) {
+      const a = this.A[s], b = this.B[s];
+      if (a === b) continue;
+      const key = Math.min(a, b) * nN + Math.max(a, b);
+      if (!this.between.has(key)) this.between.set(key, []);
+      this.between.get(key).push(s);
+    }
+  }
+
+  // Parcels that can be stimulated: mapped onto the model, with responses.
+  stimulable() {
+    if (!this.responses) return [];
+    return this.measured.parcels.map((p, i) => ({ ...p, index: i })).filter((p) => this.responses[p.index].length);
+  }
+
+  setStimulus(v) {
+    this.stimulus = v;
+    if (this.state) this.reset();
   }
 
   setScenario(id) {
@@ -342,6 +407,7 @@ export class SignalFlow {
     this.nodeAmp.fill(0);
     this.nextStim = 0;
     this.spontDebt = 0;
+    this.turn = 0;
     this.tex.needsUpdate = true;
   }
 
@@ -350,6 +416,9 @@ export class SignalFlow {
     if (!this.state) return;
     const sc = this.scenario;
     const t1 = this.time + Math.min(dt, 0.1) * this.rate;
+    if (sc.measured) {
+      while (this.responses && this.nextStim <= t1) this.nextStim += this.stimulate(this.nextStim);
+    }
     if (sc.seeds) {
       while (this.nextStim <= t1) {
         for (const [id, d] of sc.seeds) {
@@ -370,15 +439,48 @@ export class SignalFlow {
     }
     while (this.events.size && this.events.peek().t <= t1) {
       const e = this.events.pop();
-      if (e.fire) this.fire(e);
+      if (e.light) this.light(e.t, e.n, e.amp);
+      else if (e.fire) this.fire(e);
       else this.arrive(e);
     }
     this.time = t1;
     this.tex.needsUpdate = true;
   }
 
-  fire({ t, n, amp, hop }) {
-    const sc = this.scenario, S = this.state;
+  // Measured mode: stimulate one parcel at time t0 and lay out its responses. Returns how long until the next.
+  stimulate(t0) {
+    const parcels = this.measured.parcels, nN = this.desc.nodes.length;
+    let p = this.stimulus;
+    if (typeof p === 'string') {
+      const side = this.stimulable().filter((q) => q.label.startsWith(p === 'L' ? 'Left' : 'Right'));
+      p = side[this.turn++ % side.length].index;
+    }
+    const from = parcels[p].nodes, list = this.responses[p].filter((r) => r.recordings >= this.minRecordings);
+    for (const n of from) this.events.push({ t: t0, light: true, n, amp: 1 });
+    for (const r of list) {
+      const amp = shade(r.probability);
+      for (const m of parcels[r.rec].nodes) {
+        this.events.push({ t: t0 + r.onset, light: true, n: m, amp });
+        if (!(r.delay > 0)) continue;
+        for (const n of from) {
+          const ss = this.between.get(Math.min(n, m) * nN + Math.max(n, m));
+          if (!ss) continue;
+          const k = Math.min(ss.length, Math.ceil(1.6 * Math.sqrt(ss.length)));
+          for (let i = 0; i < k; i++) {
+            const s = ss[(Math.random() * ss.length) | 0];
+            this.draw(s, this.A[s] === n ? 0 : 1, t0 + Math.random() * 0.5, amp, Math.min(19.9, this.len[s] / r.delay));
+          }
+        }
+      }
+    }
+    this.onStimulus?.({ parcel: parcels[p], responses: list.map((r) => ({ ...r, parcel: parcels[r.rec] })) });
+    const last = list.length ? list[list.length - 1].onset : 0;
+    return Math.max(90, Math.min(220, last + 40));
+  }
+
+  // Light up the fibre ends at node n.
+  light(t, n, amp) {
+    const S = this.state;
     this.nodeFire[n] = t;
     this.nodeAmp[n] = amp;
     for (const e of this.ends[n]) {
@@ -386,6 +488,11 @@ export class SignalFlow {
       S[o] = t;
       S[o + 1] = amp;
     }
+  }
+
+  fire({ t, n, amp, hop }) {
+    const sc = this.scenario;
+    this.light(t, n, amp);
     if (hop >= sc.hops) return;
     const fan = sc.fanout ?? 1;
     for (const g of this.out[n]) {
@@ -400,12 +507,17 @@ export class SignalFlow {
     if (!sc.only) for (const [m, d] of this.relays[n]) this.events.push({ t: t + d, n: m, amp, hop, gain: sc.gain });
   }
 
-  pulse(s, code, t0, amp, hop, gain) {
+  // Draw a pulse on streamline s (no arrival events).
+  draw(s, code, t0, amp, vel) {
     const S = this.state, k = this.slot[s];
     this.slot[s] = (k + 1) % SLOTS;
     const o = s * 12 + (k >> 1) * 4 + (k & 1) * 2;
     S[o] = t0;
-    S[o + 1] = code + Math.min(1, amp) * 0.999;
+    S[o + 1] = pack(code, amp, vel);
+  }
+
+  pulse(s, code, t0, amp, hop, gain) {
+    this.draw(s, code, t0, amp, VELOCITY);
     const L = this.len[s];
     if (code === 0) this.events.push({ t: t0 + L / VELOCITY, n: this.B[s], amp, hop, gain });
     else if (code === 1) this.events.push({ t: t0 + L / VELOCITY, n: this.A[s], amp, hop, gain });
