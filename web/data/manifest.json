@@ -12267,7 +12267,7 @@
  },
  "ftract": {
   "description": "Measured responses to single-pulse electrical stimulation, recorded with intracranial electrodes in 780 epilepsy patients (F-TRACT atlas v2112, ages 15 and up).",
-  "source": "F-TRACT atlas (Trebaul et al. 2018; Lemar\u00e9chal et al. 2022), free for research use only",
+  "source": "F-TRACT atlas v2112 (David et al. 2013; Trebaul et al. 2018; Lemar\u00e9chal et al. 2022; doi:10.5281/zenodo.7015415), CC BY 4.0, for research use only at its authors' request",
   "parcels": [
    {
     "name": "ctx-lh-cuneus",

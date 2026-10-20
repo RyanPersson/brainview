@@ -17,7 +17,7 @@ one common space, MNI152NLin2009cAsym (millimetres, RAS), so the layers can be s
 | MRI slices | T1, T2 and GM/WM/CSF probability maps | Axial, coronal and sagittal planes, with an optional label overlay (aseg, MASSP, thalamic, tissue class). |
 | Volume rendering | The same volumes, ray-marched on the GPU | Iso-surface, translucent, or maximum-intensity projection, optionally coloured by labels. |
 | Context | Brain hull from the template's brain mask; head (skin) from the full-head T1 | Glass or solid. |
-| Signal flow | Signals travelling the tracts (this `dynamic` branch): an illustrative model, and measured stimulation responses from the F-TRACT atlas | Pulses flow along the streamlines as comets, bright head first, and the areas they reach light up. Modelled scenarios: resting activity, seeing, hearing, touch, movement, and a deep-sleep slow wave. Measured: stimulate one area (or each in turn) and watch the areas that responded light up at their recorded latencies. Gold or dark fibre-direction tract shading. Speed, brightness and glow width. Hovering a tract says which way it carries signals. |
+| Signal flow | Signals travelling the tracts: an illustrative model, and measured stimulation responses from the F-TRACT atlas | Pulses flow along the streamlines as comets, bright head first, and the areas they reach light up. Modelled scenarios: resting activity, seeing, hearing, touch, movement, and a deep-sleep slow wave. Measured: stimulate one area (or each in turn) and watch the areas that responded light up at their recorded latencies. Gold or dark fibre-direction tract shading. Speed, brightness and glow width. Hovering a tract says which way it carries signals. |
 | TMS targets | Published TMS treatment targets: depression (left DLPFC by the 5-cm rule, F3 and connectivity; right DLPFC), OCD, smoking cessation, migraine, and the motor hotspot that sets the dose | A dot on the brain target, a ring where the coil sits on the scalp, labels, and the use, method and source on hover. Group averages, for learning only. |
 
 The cut-away plane clips every 3D layer. Hovering anything names it: the region in the current
@@ -25,10 +25,8 @@ atlas, the structure, the tract, or the label under a slice. The MNI coordinate 
 
 ## Signal flow
 
-The `dynamic` branch adds signals moving through the tracts. It's private: it pushes only to a bare
-repository on the OptiPlex, never to GitHub, because the measured mode uses F-TRACT data, which is free
-for research use only. A `pre-push` hook in `.git/hooks` (not versioned) refuses to send the branch, or any commit
-with F-TRACT files, to GitHub.
+The Signal flow layer sends signals along the tracts. Its scenarios are either modelled from anatomy or
+measured: stimulation responses from the F-TRACT atlas.
 
 The modelled scenarios are a model, not a recording, and these are its parts:
 
@@ -49,9 +47,9 @@ The modelled scenarios are a model, not a recording, and these are its parts:
 
 ### Measured: stimulation responses (F-TRACT)
 
-The F-TRACT atlas ([Trebaul et al. 2018](https://doi.org/10.1016/j.neuroimage.2018.07.039),
-[Lemaréchal et al. 2022](https://doi.org/10.1093/brain/awab362), v2112 on
-[Zenodo](https://zenodo.org/records/7015415)) pools cortico-cortical evoked potentials from 780 epilepsy
+The F-TRACT atlas (v2112, [doi:10.5281/zenodo.7015415](https://doi.org/10.5281/zenodo.7015415), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); [David et al. 2013](https://doi.org/10.1016/j.neuroimage.2013.05.075),
+[Trebaul et al. 2018](https://doi.org/10.1016/j.neuroimage.2018.07.039),
+[Lemaréchal et al. 2022](https://doi.org/10.1093/brain/awab362)) pools cortico-cortical evoked potentials from 780 epilepsy
 patients with intracranial electrodes: one area gets a single electrical pulse, and the others are
 recorded. For each ordered pair of areas it gives how often a response appeared, its onset and peak
 latency, and an estimated axonal conduction delay. That's a measured direction: A drives B.
@@ -128,13 +126,16 @@ The data in `web/data/` comes from these sources:
 - cortical atlases by Desikan, Destrieux, Yeo, Schaefer, Fan (Brainnetome), Cammoun (Lausanne) and
   Glasser (HCP-MMP1, on fsaverage by Kathryn Mills);
 - the MASSP 2.0 and MIAL thalamic atlases;
-- the HCP-842 tract atlas (Yeh) as curated into 80 bundles by Garyfallidis.
+- the HCP-842 tract atlas (Yeh) as curated into 80 bundles by Garyfallidis;
+- the F-TRACT atlas of responses to intracranial stimulation (INSERM and the F-TRACT consortium; David,
+  Trebaul, Lemaréchal et al.).
 
 Each dataset keeps its own license: FreeSurfer's license, the MNI notice, CC BY 4.0, MIT, the
 Brainnetome atlas's non-commercial share-alike terms, and the
 [WU-Minn HCP Open Access Data Use Terms](https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms)
 for the HCP-derived layers. [DATA-LICENSES.md](DATA-LICENSES.md) lists which terms apply to which
 files, along with citations. The full license texts are in [web/licenses/](web/licenses/).
+F-TRACT's authors also ask that their atlas be used for research only; Brainviewer is non-commercial.
 
 Brainviewer is for learning and exploring. It is not for clinical use.
 

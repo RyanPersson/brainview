@@ -4,7 +4,8 @@ the zip's central directory, then only the wanted members. Writes raw/ftract/ext
 
 usage: python3 -I tools/fetch_ftract.py            (stdlib only; about 140 MB of transfer)
 
-F-TRACT is free for research use only, so the files stay in raw/ and the private `dynamic` branch.
+F-TRACT is CC BY 4.0 and its authors ask for research use only; see DATA-LICENSES.md for the credits.
+The originals stay in raw/ (not committed); build.py ftract writes the derived web/data/ftract/.
 """
 import http.client
 import io

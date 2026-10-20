@@ -1214,8 +1214,8 @@ def build_flow(man):
 
 # The F-TRACT atlas (v2112, adults): responses to single-pulse electrical stimulation recorded with intracranial
 # electrodes in 780 epilepsy patients, between the Lausanne2008-33 parcels (the Desikan-Killiany areas plus aseg
-# structures). Free for research use only, so it lives in the private `dynamic` branch; tools/fetch_ftract.py
-# gets the files.
+# structures). CC BY 4.0, and its authors ask for research use only (DATA-LICENSES.md has the credits);
+# tools/fetch_ftract.py gets the files.
 FTRACT = os.path.join(RAW, "ftract", "extracted", "ages_15_100", "sr_8.40", "seg_None_None", "pl_200",
                       "Lausanne2008-33")
 FTRACT_FEATURES = ["probability", "onset_latency", "peak_latency", "axonal_conduction_delay", "amplitude"]
@@ -1288,7 +1288,8 @@ def build_ftract(man):
     man["ftract"] = {
         "description": "Measured responses to single-pulse electrical stimulation, recorded with intracranial "
                        "electrodes in 780 epilepsy patients (F-TRACT atlas v2112, ages 15 and up).",
-        "source": "F-TRACT atlas (Trebaul et al. 2018; Lemaréchal et al. 2022), free for research use only",
+        "source": "F-TRACT atlas v2112 (David et al. 2013; Trebaul et al. 2018; Lemaréchal et al. 2022; "
+                  "doi:10.5281/zenodo.7015415), CC BY 4.0, for research use only at its authors' request",
         "parcels": parcels, "columns": cols, "edges": save("ftract/edges", edges)}
 
 

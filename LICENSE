@@ -3,7 +3,9 @@ The MIT License below applies only to Brainviewer's own code. It does not cover:
   - web/data/, which holds data derived from third-party neuroimaging datasets. That data keeps
     the licenses and terms of its sources: the FreeSurfer license, the MNI notice, CC BY 4.0, MIT,
     the Brainnetome terms (non-commercial, share-alike), and the WU-Minn HCP Open Access Data Use
-    Terms. See DATA-LICENSES.md, and web/licenses/ for the full texts.
+    Terms. The F-TRACT atlas (web/data/ftract/) is CC BY 4.0, and its authors ask that it be used
+    for research only. See DATA-LICENSES.md for credits and citations, and web/licenses/ for the
+    full texts.
   - web/licenses/, which holds copies of those third-party terms.
   - web/vendor/, the bundled three.js and three-mesh-bvh libraries. They come with their own MIT
     licenses.

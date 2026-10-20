@@ -44,6 +44,7 @@ them under the same
 | aseg segmentation of that template (made with FreeSurfer, distributed by TemplateFlow) | Subcortical structures, label overlay | [MNI notice](web/licenses/MNI-ICBM152.txt); label names and colours from FreeSurferColorLUT ([FreeSurfer license](web/licenses/FreeSurfer.txt)) | as for the template |
 | MASSP 2.0 subcortical atlas (Bazin, Alkemade, Forstmann, Miletic) | Subcortical nuclei | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Bazin et al. 2025, [doi:10.1162/imag_a_00560](https://doi.org/10.1162/imag_a_00560) |
 | MIAL thalamic nuclei atlas | Thalamic nuclei | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) + HCP terms | Najdenovska et al. 2018, [doi:10.1038/sdata.2018.270](https://doi.org/10.1038/sdata.2018.270) |
+| F-TRACT atlas v2112 (INSERM and the F-TRACT consortium), Lausanne2008-33, ages 15–100 | Signal flow: measured stimulation responses | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); research use only, at the authors' request (see [F-TRACT](#f-tract) below) | David et al. 2013, [doi:10.1016/j.neuroimage.2013.05.075](https://doi.org/10.1016/j.neuroimage.2013.05.075); Trebaul et al. 2018, [doi:10.1016/j.neuroimage.2018.07.039](https://doi.org/10.1016/j.neuroimage.2018.07.039); Lemaréchal et al. 2022, [doi:10.1093/brain/awab362](https://doi.org/10.1093/brain/awab362); the dataset, [doi:10.5281/zenodo.7015415](https://doi.org/10.5281/zenodo.7015415) |
 | Advanced Atlas of 80 Bundles in MNI space, © Eleftherios Garyfallidis, curated from the HCP-842 atlas | White-matter tracts | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) + HCP terms | Yeh et al. 2018, [doi:10.1016/j.neuroimage.2018.05.027](https://doi.org/10.1016/j.neuroimage.2018.05.027); Garyfallidis et al. 2018, [doi:10.1016/j.neuroimage.2017.07.015](https://doi.org/10.1016/j.neuroimage.2017.07.015) |
 
 Where the files came from:
@@ -64,22 +65,30 @@ atlas and the aseg segmentation, and keep their terms. The direction of each bun
 neuroanatomy, not data. The deep-sleep scenario follows Massimini et al. 2004,
 [doi:10.1523/JNEUROSCI.1318-04.2004](https://doi.org/10.1523/JNEUROSCI.1318-04.2004).
 
-## F-TRACT (private `dynamic` branch only)
+## F-TRACT
 
-`web/data/ftract/` is derived from the F-TRACT atlas v2112 (INSERM; Lausanne2008-33 parcellation, ages
-15–100), [Zenodo 7015415](https://zenodo.org/records/7015415). Zenodo lists the record under
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The atlas's readme also says it "is provided
-for free use for research use only", with limited accuracy, and asks users to cite:
+`web/data/ftract/` is derived from the F-TRACT atlas, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/):
 
-- David et al. 2013, Probabilistic functional tractography of the human cortex, *NeuroImage*.
-- Trebaul et al. 2018, Probabilistic functional tractography of the human cortex revisited, *NeuroImage*,
-  [doi:10.1016/j.neuroimage.2018.07.039](https://doi.org/10.1016/j.neuroimage.2018.07.039).
-- Lemaréchal et al. 2022, A brain atlas of axonal and synaptic delays based on modelling of
-  cortico-cortical evoked potentials, *Brain*, [doi:10.1093/brain/awab362](https://doi.org/10.1093/brain/awab362).
+> David O, Lemaréchal J-D, Jedynak M, Trebaul L, et al. (2021). *F-TRACT atlas*, version 21-12 (v2112).
+> Zenodo. [doi:10.5281/zenodo.7015415](https://doi.org/10.5281/zenodo.7015415)
 
-Brainviewer's copy is changed: only the Lausanne2008-33 tables for ages 15–100, cut to the pairs with a
-measured probability and onset, and stored as float32. The atlas's scripts carry a BSD-style INSERM license. Because of the research-only note, this data
-stays out of the public repository and the GitHub Pages site.
+The atlas comes from INSERM and the F-TRACT consortium: responses to single-pulse stimulation recorded
+with intracranial electrodes in 780 epilepsy patients. Its readme says it "is provided for free use for
+research use only, with limited accuracy", and the F-TRACT website says its software is "for research
+purpose only" and provided "as is". Brainviewer is a non-commercial research and teaching tool and
+passes that request on: please keep reuse of these files to research, and don't use them clinically.
+The readme asks users of the atlas to cite:
+
+- David O, Job AS, De Palma L, Hoffmann D, Minotti L, Kahane P (2013). Probabilistic functional
+  tractography of the human cortex. *NeuroImage* 80:307–317. [doi:10.1016/j.neuroimage.2013.05.075](https://doi.org/10.1016/j.neuroimage.2013.05.075)
+- Trebaul L, Deman P, Tuyisenge V, et al. (2018). Probabilistic functional tractography of the human
+  cortex revisited. *NeuroImage* 181:414–429. [doi:10.1016/j.neuroimage.2018.07.039](https://doi.org/10.1016/j.neuroimage.2018.07.039)
+- Lemaréchal J-D, Jedynak M, Trebaul L, et al. (2022). A brain atlas of axonal and synaptic delays based
+  on modelling of cortico-cortical evoked potentials. *Brain* 145(5):1653–1667. [doi:10.1093/brain/awab362](https://doi.org/10.1093/brain/awab362)
+
+Brainviewer's copy is changed: it keeps only the Lausanne2008-33 tables for ages 15–100, cut to the
+pairs with a measured probability and onset, with the parcels renamed to Brainviewer's areas, stored as
+float32. The atlas's own scripts (BSD-style INSERM license) aren't included.
 
 ## TMS targets
 
