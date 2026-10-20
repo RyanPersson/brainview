@@ -229,7 +229,9 @@ export class SignalFlow {
     this.group.visible = false;
     parent.add(this.group);
     this.playing = true;
-    this.rate = 10; // model ms per second on screen: 100x slow motion
+    this.rate = 10; // model ms per second on screen: 100x slow motion; 1000 = real time
+    // Repeats (stimuli, scenario seeds) come at most once a second on screen: near real time a whole
+    // cascade is over within a frame or two, and closer repeats would just strobe.
     this.glowWidth = 2.4;
     this.gain = 1;
     this.time = 0;
@@ -364,7 +366,8 @@ export class SignalFlow {
     for (let i = 0; i < edges.length; i += nc) {
       const e = {};
       for (const c in col) e[c] = edges[i + col[c]];
-      if (m.parcels[e.stim].nodes.length) this.responses[e.stim].push(e);
+      // both ends must be on the model (pallidum, accumbens, amygdala and brainstem aren't)
+      if (m.parcels[e.stim].nodes.length && m.parcels[e.rec].nodes.length) this.responses[e.stim].push(e);
     }
     for (const r of this.responses) r.sort((a, b) => a.onset - b.onset);
     this.between = new Map();
@@ -417,7 +420,7 @@ export class SignalFlow {
     const sc = this.scenario;
     const t1 = this.time + Math.min(dt, 0.1) * this.rate;
     if (sc.measured) {
-      while (this.responses && this.nextStim <= t1) this.nextStim += this.stimulate(this.nextStim);
+      while (this.responses && this.nextStim <= t1) this.nextStim += Math.max(this.stimulate(this.nextStim), this.rate);
     }
     if (sc.seeds) {
       while (this.nextStim <= t1) {
@@ -425,7 +428,7 @@ export class SignalFlow {
           const n = this.nodeIndex.get(id);
           if (n !== undefined) this.events.push({ t: this.nextStim + d, fire: true, n, amp: 1, hop: 0 });
         }
-        this.nextStim += sc.every;
+        this.nextStim += Math.max(sc.every, this.rate);
       }
     }
     if (sc.spont) {

@@ -388,9 +388,12 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
     },
     { label: 'Restart', onClick: () => { flow.reset(); requestRender(); } },
   ]);
+  // Log scale, faster to the right: the slider holds log10 of model ms per second on screen.
+  const slowdown = (u) => Number((1000 / 10 ** u).toPrecision(2));
   ui.slider(s.body, 'Speed', {
-    min: 2, max: 40, step: 1, value: flow.rate, format: (v) => `${Math.round(1000 / v)}× slower`,
-    onInput: (v) => { flow.rate = v; },
+    min: 0.3, max: 3, step: 0.01, value: Math.log10(flow.rate),
+    format: (u) => (slowdown(u) === 1 ? 'Real time' : `${slowdown(u)}× slower`),
+    onInput: (u) => { flow.rate = 1000 / slowdown(u); },
   });
   ui.slider(s.body, 'Brightness', {
     min: 0.2, max: 2.5, step: 0.05, value: flow.gain, format: (v) => `${Math.round(v * 100)}%`,
@@ -402,7 +405,8 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
   });
   ui.note(s.body, 'Pulses run on the bundles and density chosen under White-matter tracts. Each pulse leads with '
     + 'its bright head. Hover a tract to see which way it carries signals. The view opens cut down the middle; '
-    + 'switch off Cut-away to see the whole brain.', 'desc');
+    + 'switch off Cut-away to see the whole brain. At real time a signal crosses the brain in a frame or two, '
+    + 'so repeats are spaced at least a second apart.', 'desc');
 }
 
 // Volume slices
