@@ -1,4 +1,4 @@
-# Brainview
+# Brainviewer
 
 An interactive three.js model of the human brain built from open neuroimaging data. Every layer lives in
 one common space, MNI152NLin2009cAsym (millimetres, RAS), so the layers can be stacked, cut and compared.
@@ -81,7 +81,7 @@ serve.py         plain no-cache static server for web/ (the viewer inflates the 
 web/             index.html, style.css, js/ (main, cortex, meshes, tracts, flow, volume, ui, …), vendor/ (three r186, three-mesh-bvh),
                  licenses/ (data license texts, deployed with the site)
 raw/             downloaded datasets (not needed at runtime)
-tools/shot.mjs   headless Chrome screenshots / smoke tests: node tools/shot.mjs "name::<js using B = window.brainview>"
+tools/shot.mjs   headless Chrome screenshots / smoke tests: node tools/shot.mjs "name::<js using B = window.brainviewer>"
 tools/fetch_ftract.py  the F-TRACT files the ftract step needs (range requests into the Zenodo zip)
 ```
 
@@ -136,11 +136,11 @@ Brainnetome atlas's non-commercial share-alike terms, and the
 for the HCP-derived layers. [DATA-LICENSES.md](DATA-LICENSES.md) lists which terms apply to which
 files, along with citations. The full license texts are in [web/licenses/](web/licenses/).
 
-Brainview is for learning and exploring. It is not for clinical use.
+Brainviewer is for learning and exploring. It is not for clinical use.
 
 ## License
 
-Brainview's code is under the MIT License; see [LICENSE](LICENSE). That covers `web/index.html`,
+Brainviewer's code is under the MIT License; see [LICENSE](LICENSE). That covers `web/index.html`,
 `web/style.css`, `web/js/`, `build/`, `tools/`, `serve.py` and the workflow. The MIT License does
 **not** cover:
 

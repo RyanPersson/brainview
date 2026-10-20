@@ -701,7 +701,7 @@ renderer.setAnimationLoop(() => {
   }
 });
 
-window.brainview = {
+window.brainviewer = {
   THREE, scene, camera, controls, renderer, brain, cortex, aseg, massp, thalamic, context, tracts, slices, volume, tms,
   flow,
   setView, requestRender, clip, applyClip,

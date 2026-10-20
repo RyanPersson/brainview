@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static server for brainview (web/).  No-cache so edits show on reload.
+"""Static server for Brainviewer (web/).  No-cache so edits show on reload.
 
 The data files are plain *.bin.gz files that the viewer inflates itself, so this is an ordinary
 static server — the same files work unchanged on GitHub Pages.

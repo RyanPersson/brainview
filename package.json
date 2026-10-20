@@ -1,5 +1,5 @@
 {
-  "name": "brainview",
+  "name": "brainviewer",
   "version": "1.0.0",
   "private": true,
   "description": "three.js viewer for open brain-imaging data (cortex atlases, nuclei, tracts, MRI volumes)",

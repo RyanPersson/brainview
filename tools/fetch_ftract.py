@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch the few files Brainview uses from the F-TRACT atlas zip on Zenodo (915 MB) with HTTP range requests:
+"""Fetch the few files Brainviewer uses from the F-TRACT atlas zip on Zenodo (915 MB) with HTTP range requests:
 the zip's central directory, then only the wanted members. Writes raw/ftract/extracted/<member path>.
 
 usage: python3 -I tools/fetch_ftract.py            (stdlib only; about 140 MB of transfer)

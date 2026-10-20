@@ -1,7 +1,7 @@
 WU-Minn HCP Consortium Open Access Data Use Terms (terms updated Apr 26, 2013)
 https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms
 
-These layers of Brainview are derived from WU-Minn HCP Open Access data and are redistributed under
+These layers of Brainviewer are derived from WU-Minn HCP Open Access data and are redistributed under
 these same terms:
   - the Glasser HCP-MMP1 cortical parcellation (web/data/cortex/*_atlas_hcpmmp*)
   - the HCP-842 white-matter tracts (web/data/tracts/)

@@ -1,5 +1,5 @@
 // Headless check: load the viewer once, then for each "name::js" argument run the snippet against
-// window.brainview (as B) and save out/<name>.png.   usage: node tools/shot.mjs "a::B.setView('Left')" ...
+// window.brainviewer (as B) and save out/<name>.png.   usage: node tools/shot.mjs "a::B.setView('Left')" ...
 import { mkdirSync, readdirSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
 const W = +(process.env.W || 1440), H = +(process.env.H || 900);
@@ -18,12 +18,12 @@ page.on('console', (m) => { if (m.type() !== 'debug') console.log(`[${m.type()}]
 page.on('pageerror', (e) => console.log(`[pageerror] ${e.message}`));
 const t0 = Date.now();
 await page.goto(process.env.URL || 'http://127.0.0.1:8051/', { waitUntil: 'load' });
-await page.waitForFunction(() => !document.getElementById('loading') && window.brainview, { timeout: 120000 });
+await page.waitForFunction(() => !document.getElementById('loading') && window.brainviewer, { timeout: 120000 });
 console.log(`[time] loaded in ${Date.now() - t0} ms`);
 for (const arg of process.argv.slice(2)) {
   const [name, snippet = '', mouse = ''] = arg.split('::');
   const t1 = Date.now();
-  const r = await page.evaluate(`(async () => { const B = window.brainview; ${snippet}; B.requestRender(); })()`);
+  const r = await page.evaluate(`(async () => { const B = window.brainviewer; ${snippet}; B.requestRender(); })()`);
   if (r !== undefined) console.log(`[result] ${JSON.stringify(r)}`);
   await page.waitForFunction(() => document.getElementById('status').hidden, { timeout: 120000 });
   await new Promise((r) => setTimeout(r, 500));
