@@ -1,6 +1,6 @@
-ICBM 2009c Nonlinear Asymmetric template (MNI152NLin2009cAsym), used in Brainview for the T1, T2,
+ICBM 2009c Nonlinear Asymmetric template (MNI152NLin2009cAsym), used in Brainviewer for the T1, T2,
 tissue-probability and mask volumes and for the meshes derived from them. Obtained through
-TemplateFlow (https://www.templateflow.org); the copies in Brainview are resampled and quantized.
+TemplateFlow (https://www.templateflow.org); the copies in Brainviewer are resampled and quantized.
 
 Copyright (C) 1993–2004 Louis Collins, McConnell Brain Imaging Centre, Montreal Neurological Institute, McGill University.
 Permission to use, copy, modify, and distribute this software and its documentation for any purpose and without fee is

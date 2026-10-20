@@ -1,8 +1,8 @@
 # Data credits and licenses
 
 Everything in `web/data/` is derived from the open datasets below, and each one stays under its
-own terms. The MIT License in [LICENSE](LICENSE) covers only Brainview's code, not this data.
-None of the files are the originals. Brainview has converted all of them to compact
+own terms. The MIT License in [LICENSE](LICENSE) covers only Brainviewer's code, not this data.
+None of the files are the originals. Brainviewer has converted all of them to compact
 binaries, moved the surfaces from MNI305 into MNI152 space, quantized positions to 16 bits and
 intensities to 8 bits, and turned label maps into colour-table indices. It has also computed the
 inflated surfaces, the pial–white distance map and every 3D mesh from the volumes, and subsampled
@@ -19,7 +19,7 @@ Centers that support the NIH Blueprint for Neuroscience Research; and by the McD
 Systems Neuroscience at Washington University.
 
 Four layers are derived from WU-Minn HCP Open Access data: the Glasser HCP-MMP1 parcellation, the
-HCP-842 tracts, the MIAL thalamic nuclei and the Brainnetome parcellation. Brainview redistributes
+HCP-842 tracts, the MIAL thalamic nuclei and the Brainnetome parcellation. Brainviewer redistributes
 them under the same
 [WU-Minn HCP Open Access Data Use Terms](https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms)
 ([copy](web/licenses/HCP-Open-Access-Data-Use-Terms.txt)). Anyone who reuses these files must:
@@ -55,7 +55,7 @@ Where the files came from:
   and are shown in 2009c without resampling.
 
 The FreeSurfer license notes that this data was made for research and is not meant for clinical
-use. Brainview is the same: it's for learning and exploring, not for diagnosis.
+use. Brainviewer is the same: it's for learning and exploring, not for diagnosis.
 
 ## TMS targets
 

@@ -1,4 +1,4 @@
-The MIT License below applies only to Brainview's own code. It does not cover:
+The MIT License below applies only to Brainviewer's own code. It does not cover:
 
   - web/data/, which holds data derived from third-party neuroimaging datasets. That data keeps
     the licenses and terms of its sources: the FreeSurfer license, the MNI notice, CC BY 4.0, MIT,

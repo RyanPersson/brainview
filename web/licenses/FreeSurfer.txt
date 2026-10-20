@@ -1,6 +1,6 @@
-FreeSurfer data in Brainview: the fsaverage surfaces and morphometry (pial, white, sphere, sulc,
+FreeSurfer data in Brainviewer: the fsaverage surfaces and morphometry (pial, white, sphere, sulc,
 curv), the Desikan-Killiany, Destrieux and Yeo 2011 annotations on fsaverage as distributed with
-FreeSurfer 7, and the label names and colours of FreeSurferColorLUT.txt. The copies in Brainview are
+FreeSurfer 7, and the label names and colours of FreeSurferColorLUT.txt. The copies in Brainviewer are
 MODIFIED: converted to compact binaries, moved from MNI305 into MNI152 space, quantized, and (for the
 inflated surfaces) smoothed. They are not the original FreeSurfer files.
 
