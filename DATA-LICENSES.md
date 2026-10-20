@@ -67,8 +67,9 @@ neuroanatomy, not data. The deep-sleep scenario follows Massimini et al. 2004,
 ## F-TRACT (private `dynamic` branch only)
 
 `web/data/ftract/` is derived from the F-TRACT atlas v2112 (INSERM; Lausanne2008-33 parcellation, ages
-15–100), [Zenodo 7015415](https://zenodo.org/records/7015415). Its readme says the atlas "is provided for
-free use for research use only", with limited accuracy, and asks users to cite:
+15–100), [Zenodo 7015415](https://zenodo.org/records/7015415). Zenodo lists the record under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The atlas's readme also says it "is provided
+for free use for research use only", with limited accuracy, and asks users to cite:
 
 - David et al. 2013, Probabilistic functional tractography of the human cortex, *NeuroImage*.
 - Trebaul et al. 2018, Probabilistic functional tractography of the human cortex revisited, *NeuroImage*,
@@ -76,7 +77,8 @@ free use for research use only", with limited accuracy, and asks users to cite:
 - Lemaréchal et al. 2022, A brain atlas of axonal and synaptic delays based on modelling of
   cortico-cortical evoked potentials, *Brain*, [doi:10.1093/brain/awab362](https://doi.org/10.1093/brain/awab362).
 
-The atlas's scripts carry a BSD-style INSERM license. Because of the research-only terms, this data
+Brainviewer's copy is changed: only the Lausanne2008-33 tables for ages 15–100, cut to the pairs with a
+measured probability and onset, and stored as float32. The atlas's scripts carry a BSD-style INSERM license. Because of the research-only note, this data
 stays out of the public repository and the GitHub Pages site.
 
 ## TMS targets
