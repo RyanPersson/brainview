@@ -547,6 +547,7 @@ export class SignalFlow {
 
   // Keep the glow meshes in step with the tract layer's bundle filters and density.
   sync() {
+    if (!this.meshes) return; // still loading
     const tr = this.tracts;
     for (const m of this.meshes) {
       const b = m.userData.item;

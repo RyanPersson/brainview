@@ -114,18 +114,16 @@ const volume = new VolumeRender(store, brain);
 const tms = new TmsTargets(man.tms, brain);
 const structureGroups = [aseg, massp, thalamic, context];
 
-// Opening view: the white-matter tracts, dark with fibre-direction colours, with signals flowing, cut down the middle and seen from the right
-// (the left hemisphere's inner face, as in Greg Dunn's Self Reflected); every other layer loads when first switched on.
-setView('Right', 430);
-tracts.mode = 3;
+// Opening view: the white-matter tracts on their own, coloured by fibre direction. Every other layer, signal flow
+// included, loads when first switched on, so the first view stays light enough for most devices.
+setView('Left', 430);
 tracts.setVisible(true);
-flow.setVisible(true);
-await withBusy('tracts', 'Loading tracts…', flow.load());
+await withBusy('tracts', 'Loading tracts…', tracts.load());
 document.getElementById('loading').remove();
 
 // ---------------------------------------------------------------------------- clipping
 
-const clip = { axis: 'x', pos: { x: -4, y: -18, z: 10 }, flip: false };
+const clip = { axis: 'off', pos: { x: -4, y: -18, z: 10 }, flip: false };
 const localPlane = new THREE.Plane();
 function applyClip() {
   clipPlanes.length = 0;
@@ -335,7 +333,7 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
 // Signal flow
 {
   const s = ui.section(panel, 'Signal flow', {
-    checked: true, open: true,
+    checked: false,
     hint: man.ftract ? 'Signals travelling the white-matter tracts: illustrative models built from textbook '
       + 'anatomy, or measured responses from intracranial recordings (F-TRACT).' : man.flow.description,
     onToggle: (v) => { flow.setVisible(v); if (v) withBusy('flow', 'Loading tracts…', flow.load()); requestRender(); },
@@ -404,8 +402,8 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
     onInput: (v) => { flow.glowWidth = v; requestRender(); },
   });
   ui.note(s.body, 'Pulses run on the bundles and density chosen under White-matter tracts. Each pulse leads with '
-    + 'its bright head. Hover a tract to see which way it carries signals. The view opens cut down the middle; '
-    + 'switch off Cut-away to see the whole brain. At real time a signal crosses the brain in a frame or two, '
+    + 'its bright head. Hover a tract to see which way it carries signals. Pulses are easiest to see with the '
+    + 'brain cut down the middle (Cut-away: Sagittal) and a dark colouring under White-matter tracts. At real time a signal crosses the brain in a frame or two, '
     + 'so repeats are spaced at least a second apart.', 'desc');
 }
 
