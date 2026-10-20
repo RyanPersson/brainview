@@ -55,8 +55,8 @@ const fragmentShader = /* glsl */`
     vec3 c = vColor * (0.28 + 0.8 * diff) + 0.22 * spec;
     if (uMode >= 2) {
       // gold leaf: a dark metal whose highlight runs along each fibre (hair-style anisotropic sheen), with a
-      // faint hue drift by viewing angle like the etched gold of a reflective microetching; mode 3 is the same
-      // dark sheen in the fibre-direction colours
+      // faint hue drift by viewing angle like the etched gold of a reflective microetching; modes 3 and 4 are the
+      // same dark sheen in the fibre-direction and bundle colours
       vec3 T = normalize(vTan);
       float th = dot(T, normalize(L + vView));
       float sheen = pow(max(0.0, 1.0 - th * th), 30.0);
@@ -79,7 +79,7 @@ export class Tracts {
     parent.add(this.group);
     this.width = 0.5;
     this.density = 0.6;
-    this.mode = 0; // 0 = direction, 1 = bundle colour, 2 = gold, 3 = direction, dark
+    this.mode = 0; // 0 = direction, 1 = bundle colour, 2 = gold, 3 = direction, dark, 4 = bundle colour, dark
     this.opacity = 1;
     this.catOn = Object.fromEntries(desc.categories.map((c) => [c, true]));
     this.items = desc.bundles.map((b) => ({ ...b, on: true, mesh: null }));

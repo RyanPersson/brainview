@@ -6,3 +6,5 @@ node_modules/
 __pycache__/
 # headless screenshots from tools/shot.mjs
 out/
+# extra checkouts of older commits, for side-by-side comparison
+worktrees/

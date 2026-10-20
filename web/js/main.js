@@ -114,10 +114,10 @@ const volume = new VolumeRender(store, brain);
 const tms = new TmsTargets(man.tms, brain);
 const structureGroups = [aseg, massp, thalamic, context];
 
-// Opening view: the gold white-matter tracts with signals flowing, cut down the middle and seen from the right
+// Opening view: the white-matter tracts, dark with fibre-direction colours, with signals flowing, cut down the middle and seen from the right
 // (the left hemisphere's inner face, as in Greg Dunn's Self Reflected); every other layer loads when first switched on.
 setView('Right', 430);
-tracts.mode = 2;
+tracts.mode = 3;
 tracts.setVisible(true);
 flow.setVisible(true);
 await withBusy('tracts', 'Loading tracts…', flow.load());
@@ -292,7 +292,7 @@ structureSection(thalamic, 'Thalamic nuclei', { hint: 'Seven nuclear groups per 
   key.hidden = tracts.mode !== 0 && tracts.mode !== 3;
   ui.select(s.body, 'Colour by', [
     { value: '0', label: 'Fibre direction' }, { value: '3', label: 'Fibre direction (dark)' },
-    { value: '1', label: 'Bundle' }, { value: '2', label: 'Gold' }],
+    { value: '1', label: 'Bundle' }, { value: '4', label: 'Bundle (dark)' }, { value: '2', label: 'Gold' }],
   String(tracts.mode),
   (v) => { tracts.mode = +v; key.hidden = v !== '0' && v !== '3'; tracts.apply(); requestRender(); }).row.after(key);
   ui.slider(s.body, 'Width', {
